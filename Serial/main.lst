@@ -1,0 +1,4414 @@
+CCS PCM C Compiler, Version 4.104, 5967               24-nov-21 13:52
+
+               Filename: C:\Users\João\Desktop\Catraca\main.lst
+
+               ROM used: 3682 words (45%)
+                         Largest free fragment is 2048
+               RAM used: 69 (19%) at main() level
+                         94 (26%) worst case
+               Stack:    8 worst case (7 in main + 1 for interrupts)
+
+*
+0000:  MOVLW  09
+0001:  MOVWF  0A
+0002:  GOTO   1A0
+0003:  NOP
+0004:  MOVWF  7F
+0005:  SWAPF  03,W
+0006:  CLRF   03
+0007:  MOVWF  21
+0008:  MOVF   0A,W
+0009:  MOVWF  20
+000A:  CLRF   0A
+000B:  MOVF   04,W
+000C:  MOVWF  22
+000D:  MOVF   77,W
+000E:  MOVWF  23
+000F:  MOVF   78,W
+0010:  MOVWF  24
+0011:  MOVF   79,W
+0012:  MOVWF  25
+0013:  MOVF   7A,W
+0014:  MOVWF  26
+0015:  BCF    03.7
+0016:  BCF    03.5
+0017:  MOVLW  8C
+0018:  MOVWF  04
+0019:  BTFSS  00.5
+001A:  GOTO   01D
+001B:  BTFSC  0C.5
+001C:  GOTO   02E
+001D:  MOVF   22,W
+001E:  MOVWF  04
+001F:  MOVF   23,W
+0020:  MOVWF  77
+0021:  MOVF   24,W
+0022:  MOVWF  78
+0023:  MOVF   25,W
+0024:  MOVWF  79
+0025:  MOVF   26,W
+0026:  MOVWF  7A
+0027:  MOVF   20,W
+0028:  MOVWF  0A
+0029:  SWAPF  21,W
+002A:  MOVWF  03
+002B:  SWAPF  7F,F
+002C:  SWAPF  7F,W
+002D:  RETFIE
+002E:  BCF    0A.3
+002F:  BCF    0A.4
+0030:  GOTO   054
+.................... //#include "C:\Users\JoÃ£o\Desktop\AAAA\main.h" 
+.................... #include "config.c" 
+....................  
+.................... #include <16F877A.h> 
+.................... //////// Standard Header file for the PIC16F877A device //////////////// 
+.................... #device PIC16F877A 
+.................... #list 
+....................  
+.................... #device adc=8 
+.................... #FUSES HS                       //High speed Osc (> 4mhz for PCM/PCH) (>10mhz for PCD) 
+.................... #FUSES NOPUT                    //No Power Up Timer 
+.................... #FUSES NOPROTECT                //Code not protected from reading 
+.................... #FUSES NODEBUG                  //No Debug mode for ICD 
+.................... #FUSES NOBROWNOUT               //No brownout reset 
+.................... #FUSES NOLVP                    //No low voltage prgming, B3(PIC16) or B5(PIC18) used for I/O 
+.................... #FUSES NOCPD                    //No EE protection 
+.................... #FUSES NOWRT                    //Program memory not write protected 
+....................  
+.................... #use delay(clock=20000000) 
+*
+023D:  MOVLW  6F
+023E:  MOVWF  04
+023F:  BCF    03.7
+0240:  MOVF   00,W
+0241:  BTFSC  03.2
+0242:  GOTO   250
+0243:  MOVLW  06
+0244:  MOVWF  78
+0245:  CLRF   77
+0246:  DECFSZ 77,F
+0247:  GOTO   246
+0248:  DECFSZ 78,F
+0249:  GOTO   245
+024A:  MOVLW  7B
+024B:  MOVWF  77
+024C:  DECFSZ 77,F
+024D:  GOTO   24C
+024E:  DECFSZ 00,F
+024F:  GOTO   243
+0250:  RETURN
+.................... #use rs232(baud=9600,parity=N,xmit=PIN_C6,rcv=PIN_C7,bits=8,stream=Wireless) 
+....................  
+.................... //===================== Bibliotecas=============================  
+....................  
+.................... #ifndef lcd_enable 
+.................... #define lcd_enable     pin_E1      // pino enable do LCD 
+.................... #define lcd_rs         pin_E2      // pino rs do LCD 
+.................... //#define lcd_rw      pin_e2      // pino rw do LCD 
+.................... #define lcd_d4         pin_d4      // pino de dados d4 do LCD 
+.................... #define lcd_d5         pin_d5      // pino de dados d5 do LCD 
+.................... #define lcd_d6         pin_d6      // pino de dados d6 do LCD 
+.................... #define lcd_d7         pin_d7      // pino de dados d7 do LCD 
+.................... #endif 
+....................  
+.................... #include "mod_lcd.c" 
+.................... /************************************************************************/ 
+.................... /*  MOD_LCD.C - Biblioteca de manipulação de módulo LCD                 */ 
+.................... /*                                                                      */ 
+.................... /*  Autor: Fábio Pereira                                                */ 
+.................... /*                                                                      */ 
+.................... /************************************************************************/ 
+....................  
+.................... // As definições a seguir são utilizadas para acesso aos pinos do display 
+.................... // caso o pino RW não seja utilizado, comente a definição lcd_rw 
+.................... #ifndef lcd_enable 
+.................... 	#define lcd_enable 		pin_e1		// pino enable do LCD 
+.................... 	#define lcd_rs			pin_e0		// pino rs do LCD 
+.................... 	//#define lcd_rw		pin_e2		// pino rw do LCD 
+.................... 	#define lcd_d4			pin_d4		// pino de dados d4 do LCD 
+.................... 	#define lcd_d5			pin_d5		// pino de dados d5 do LCD 
+.................... 	#define lcd_d6			pin_d6		// pino de dados d6 do LCD 
+.................... 	#define lcd_d7			pin_d7		// pino de dados d7 do LCD 
+.................... #endif 
+....................  
+.................... #define lcd_type 2           // 0=5x7, 1=5x10, 2=2 linhas 
+.................... #define lcd_seg_lin 0x40    // Endereço da segunda linha na RAM do LCD 
+....................  
+.................... // a constante abaixo define a seqüência de inicialização do módulo LCD 
+.................... byte CONST INI_LCD[4] = {0x20 | (lcd_type << 2), 0xf, 1, 6}; 
+....................  
+.................... byte lcd_le_byte() 
+.................... // lê um byte do LCD (somente com pino RW) 
+.................... { 
+.................... 	byte dado; 
+.................... 	// configura os pinos de dados como entradas 
+.................... 	input(lcd_d4); 
+.................... 	input(lcd_d5); 
+.................... 	input(lcd_d6); 
+.................... 	input(lcd_d7); 
+.................... 	// se o pino rw for utilizado, coloca em 1 
+.................... 	#ifdef lcd_rw 
+.................... 		output_high(lcd_rw); 
+.................... 	#endif 
+....................    output_high(lcd_enable); // habilita display 
+.................... 	dado = 0;	// zera a variável de leitura 
+.................... 	// lê os quatro bits mais significativos 
+.................... 	if (input(lcd_d7)) bit_set(dado,7); 
+.................... 	if (input(lcd_d6)) bit_set(dado,6); 
+.................... 	if (input(lcd_d5)) bit_set(dado,5); 
+.................... 	if (input(lcd_d4)) bit_set(dado,4); 
+.................... 	// dá um pulso na linha enable 
+.................... 	output_low(lcd_enable); 
+.................... 	output_high(lcd_enable); 
+.................... 	// lê os quatro bits menos significativos 
+.................... 	if (input(lcd_d7)) bit_set(dado,3); 
+.................... 	if (input(lcd_d6)) bit_set(dado,2); 
+.................... 	if (input(lcd_d5)) bit_set(dado,1); 
+.................... 	if (input(lcd_d4)) bit_set(dado,0); 
+.................... 	output_low(lcd_enable);	// desabilita o display 
+.................... 	return dado;	// retorna o byte lido 
+.................... } 
+....................  
+.................... void lcd_envia_nibble( byte dado ) 
+.................... // envia um dado de quatro bits para o display 
+.................... { 
+.................... 	// coloca os quatro bits nas saidas 
+.................... 	output_bit(lcd_d4,bit_test(dado,0)); 
+0251:  BTFSC  76.0
+0252:  GOTO   255
+0253:  BCF    08.4
+0254:  GOTO   256
+0255:  BSF    08.4
+0256:  BSF    03.5
+0257:  BCF    08.4
+.................... 	output_bit(lcd_d5,bit_test(dado,1)); 
+0258:  BTFSC  76.1
+0259:  GOTO   25E
+025A:  BCF    03.5
+025B:  BCF    08.5
+025C:  GOTO   260
+025D:  BSF    03.5
+025E:  BCF    03.5
+025F:  BSF    08.5
+0260:  BSF    03.5
+0261:  BCF    08.5
+.................... 	output_bit(lcd_d6,bit_test(dado,2)); 
+0262:  BTFSC  76.2
+0263:  GOTO   268
+0264:  BCF    03.5
+0265:  BCF    08.6
+0266:  GOTO   26A
+0267:  BSF    03.5
+0268:  BCF    03.5
+0269:  BSF    08.6
+026A:  BSF    03.5
+026B:  BCF    08.6
+.................... 	output_bit(lcd_d7,bit_test(dado,3)); 
+026C:  BTFSC  76.3
+026D:  GOTO   272
+026E:  BCF    03.5
+026F:  BCF    08.7
+0270:  GOTO   274
+0271:  BSF    03.5
+0272:  BCF    03.5
+0273:  BSF    08.7
+0274:  BSF    03.5
+0275:  BCF    08.7
+.................... 	// dá um pulso na linha enable 
+.................... 	output_high(lcd_enable); 
+0276:  BCF    09.1
+0277:  BCF    03.5
+0278:  BSF    09.1
+.................... 	output_low(lcd_enable); 
+0279:  BSF    03.5
+027A:  BCF    09.1
+027B:  BCF    03.5
+027C:  BCF    09.1
+.................... } 
+027D:  RETURN
+....................  
+....................  
+.................... void lcd_envia_byte( boolean endereco, byte dado ) 
+.................... { 
+.................... 	// coloca a linha rs em 0 
+.................... 	output_low(lcd_rs); 
+027E:  BSF    03.5
+027F:  BCF    09.2
+0280:  BCF    03.5
+0281:  BCF    09.2
+.................... 	// aguarda o display ficar desocupado 
+.................... 	//while ( bit_test(lcd_le_byte(),7) ) ; 
+.................... 	// configura a linha rs dependendo do modo selecionado 
+.................... 	output_bit(lcd_rs,endereco); 
+0282:  MOVF   73,F
+0283:  BTFSS  03.2
+0284:  GOTO   287
+0285:  BCF    09.2
+0286:  GOTO   288
+0287:  BSF    09.2
+0288:  BSF    03.5
+0289:  BCF    09.2
+.................... 	delay_us(100);	// aguarda 100 us 
+028A:  MOVLW  A6
+028B:  MOVWF  77
+028C:  DECFSZ 77,F
+028D:  GOTO   28C
+028E:  NOP
+.................... 	// caso a linha rw esteja definida, coloca em 0 
+.................... 	#ifdef lcd_rw 
+.................... 		output_low(lcd_rw); 
+.................... 	#endif 
+.................... 	// desativa linha enable 
+.................... 	output_low(lcd_enable); 
+028F:  BCF    09.1
+0290:  BCF    03.5
+0291:  BCF    09.1
+.................... 	// envia a primeira parte do byte 
+.................... 	lcd_envia_nibble(dado >> 4); 
+0292:  SWAPF  74,W
+0293:  MOVWF  75
+0294:  MOVLW  0F
+0295:  ANDWF  75,F
+0296:  MOVF   75,W
+0297:  MOVWF  76
+0298:  CALL   251
+.................... 	// envia a segunda parte do byte 
+.................... 	lcd_envia_nibble(dado & 0x0f); 
+0299:  MOVF   74,W
+029A:  ANDLW  0F
+029B:  MOVWF  75
+029C:  MOVWF  76
+029D:  CALL   251
+.................... } 
+029E:  RETURN
+....................  
+....................  
+.................... void lcd_ini() 
+.................... // rotina de inicialização do display 
+.................... { 
+.................... 	byte conta; 
+.................... 	output_low(lcd_d4); 
+029F:  BSF    03.5
+02A0:  BCF    08.4
+02A1:  BCF    03.5
+02A2:  BCF    08.4
+.................... 	output_low(lcd_d5); 
+02A3:  BSF    03.5
+02A4:  BCF    08.5
+02A5:  BCF    03.5
+02A6:  BCF    08.5
+.................... 	output_low(lcd_d6); 
+02A7:  BSF    03.5
+02A8:  BCF    08.6
+02A9:  BCF    03.5
+02AA:  BCF    08.6
+.................... 	output_low(lcd_d7); 
+02AB:  BSF    03.5
+02AC:  BCF    08.7
+02AD:  BCF    03.5
+02AE:  BCF    08.7
+.................... 	output_low(lcd_rs); 
+02AF:  BSF    03.5
+02B0:  BCF    09.2
+02B1:  BCF    03.5
+02B2:  BCF    09.2
+.................... 	#ifdef lcd_rw 
+.................... 		output_high(lcd_rw); 
+.................... 	#endif 
+.................... 	output_low(lcd_enable); 
+02B3:  BSF    03.5
+02B4:  BCF    09.1
+02B5:  BCF    03.5
+02B6:  BCF    09.1
+.................... 	delay_ms(15); 
+02B7:  MOVLW  0F
+02B8:  MOVWF  6F
+02B9:  CALL   23D
+.................... 	// envia uma seqüência de 3 vezes 0x03 
+.................... 	// e depois 0x02 para configurar o módulo 
+.................... 	// para modo de 4 bits 
+.................... 	for(conta=1;conta<=3;++conta) 
+02BA:  MOVLW  01
+02BB:  MOVWF  60
+02BC:  MOVF   60,W
+02BD:  SUBLW  03
+02BE:  BTFSS  03.0
+02BF:  GOTO   2C8
+.................... 	{ 
+.................... 		lcd_envia_nibble(3); 
+02C0:  MOVLW  03
+02C1:  MOVWF  76
+02C2:  CALL   251
+.................... 		delay_ms(5); 
+02C3:  MOVLW  05
+02C4:  MOVWF  6F
+02C5:  CALL   23D
+.................... 	} 
+02C6:  INCF   60,F
+02C7:  GOTO   2BC
+.................... 	lcd_envia_nibble(2); 
+02C8:  MOVLW  02
+02C9:  MOVWF  76
+02CA:  CALL   251
+.................... 	// envia string de inicialização do display 
+.................... 	for(conta=0;conta<=3;++conta) lcd_envia_byte(0,INI_LCD[conta]); 
+02CB:  CLRF   60
+02CC:  MOVF   60,W
+02CD:  SUBLW  03
+02CE:  BTFSS  03.0
+02CF:  GOTO   2D9
+02D0:  MOVF   60,W
+02D1:  CALL   031
+02D2:  MOVWF  61
+02D3:  CLRF   73
+02D4:  MOVF   61,W
+02D5:  MOVWF  74
+02D6:  CALL   27E
+02D7:  INCF   60,F
+02D8:  GOTO   2CC
+.................... } 
+02D9:  BSF    0A.3
+02DA:  BCF    0A.4
+02DB:  GOTO   221 (RETURN)
+....................  
+.................... void lcd_pos_xy( byte x, byte y) 
+.................... { 
+....................    byte endereco; 
+....................    if(y!=1) 
+*
+02F6:  DECFSZ 70,W
+02F7:  GOTO   2F9
+02F8:  GOTO   2FC
+....................    	endereco = lcd_seg_lin; 
+02F9:  MOVLW  40
+02FA:  MOVWF  71
+....................    else 
+02FB:  GOTO   2FD
+....................    	endereco = 0; 
+02FC:  CLRF   71
+....................    endereco += x-1; 
+02FD:  MOVLW  01
+02FE:  SUBWF  6F,W
+02FF:  ADDWF  71,F
+....................    lcd_envia_byte(0,0x80|endereco); 
+0300:  MOVF   71,W
+0301:  IORLW  80
+0302:  MOVWF  72
+0303:  CLRF   73
+0304:  MOVF   72,W
+0305:  MOVWF  74
+0306:  CALL   27E
+.................... } 
+....................  
+.................... void lcd_escreve( char c) 
+.................... // envia caractere para o display 
+.................... { 
+....................    switch (c) 
+.................... 	{ 
+*
+02DC:  MOVF   6E,W
+02DD:  XORLW  0C
+02DE:  BTFSC  03.2
+02DF:  GOTO   2EA
+02E0:  XORLW  06
+02E1:  BTFSC  03.2
+02E2:  GOTO   2F2
+02E3:  XORLW  07
+02E4:  BTFSC  03.2
+02E5:  GOTO   2F2
+02E6:  XORLW  05
+02E7:  BTFSC  03.2
+02E8:  GOTO   308
+02E9:  GOTO   30D
+....................      case '\f' 	:	lcd_envia_byte(0,1); 
+02EA:  CLRF   73
+02EB:  MOVLW  01
+02EC:  MOVWF  74
+02ED:  CALL   27E
+.................... 	  			delay_ms(2); 
+02EE:  MOVLW  02
+02EF:  MOVWF  6F
+02F0:  CALL   23D
+.................... 				break; 
+02F1:  GOTO   313
+....................      case '\n'	: 
+.................... 	  case '\r' 	:	lcd_pos_xy(1,2); 
+02F2:  MOVLW  01
+02F3:  MOVWF  6F
+02F4:  MOVLW  02
+02F5:  MOVWF  70
+.................... 	  			break; 
+*
+0307:  GOTO   313
+....................      case '\b' 	:	lcd_envia_byte(0,0x10); 
+0308:  CLRF   73
+0309:  MOVLW  10
+030A:  MOVWF  74
+030B:  CALL   27E
+.................... 	  			break; 
+030C:  GOTO   313
+....................      default	:	lcd_envia_byte(1,c); 
+030D:  MOVLW  01
+030E:  MOVWF  73
+030F:  MOVF   6E,W
+0310:  MOVWF  74
+0311:  CALL   27E
+.................... 	  			break; 
+0312:  GOTO   313
+....................    } 
+.................... } 
+0313:  RETURN
+....................  
+.................... char lcd_le( byte x, byte y) 
+.................... // le caractere do display 
+.................... { 
+.................... 	char valor; 
+.................... 	// seleciona a posição do caractere 
+.................... 	lcd_pos_xy(x,y); 
+.................... 	// ativa rs 
+.................... 	output_high(lcd_rs); 
+.................... 	// lê o caractere 
+.................... 	valor = lcd_le_byte(); 
+.................... 	// desativa rs 
+.................... 	output_low(lcd_rs); 
+.................... 	// retorna o valor do caractere 
+.................... 	return valor; 
+.................... } 
+....................  
+.................... #include "kbd_ext_board2.c" 
+.................... /*######################################################################  
+....................    Rotina utilização do teclado da placa PicSim board4 
+....................    Adaptada para o compilador CCS 
+....................    Autor: Alberto Willia Mascarenhas (adaptou para o compilador) 
+....................    For e-mail suggestions :  awmascarenhas@gmail.com 
+.................... ######################################################################## */ 
+.................... unsigned char tc_tecla(unsigned int timeout) 
+.................... { 
+*
+06B7:  CLRF   69
+06B8:  CLRF   6A
+....................   unsigned int to=0; 
+....................   unsigned char k = 0;   
+....................   while(((to < timeout)||(!timeout))&&(!k)){ 
+06B9:  MOVF   68,W
+06BA:  SUBWF  69,W
+06BB:  BTFSS  03.0
+06BC:  GOTO   6C0
+06BD:  MOVF   68,F
+06BE:  BTFSS  03.2
+06BF:  GOTO   7D5
+06C0:  MOVF   6A,F
+06C1:  BTFSS  03.2
+06C2:  GOTO   7D5
+....................       
+....................        
+....................       //------------------------------------------------------------------------- 
+....................       //inicio do programa de varredura do teclado matricial 
+....................       //-------------------------------------------------------------------------- 
+....................       //habilita primeira coluna do teclado 
+....................       output_low(PIN_B0);output_high(PIN_B1);output_high(PIN_B2);output_high(PIN_B3); 
+06C3:  BSF    03.5
+06C4:  BCF    06.0
+06C5:  BCF    03.5
+06C6:  BCF    06.0
+06C7:  BSF    03.5
+06C8:  BCF    06.1
+06C9:  BCF    03.5
+06CA:  BSF    06.1
+06CB:  BSF    03.5
+06CC:  BCF    06.2
+06CD:  BCF    03.5
+06CE:  BSF    06.2
+06CF:  BSF    03.5
+06D0:  BCF    06.3
+06D1:  BCF    03.5
+06D2:  BSF    06.3
+....................       delay_ms(20); 
+06D3:  MOVLW  14
+06D4:  MOVWF  6F
+06D5:  CALL   23D
+....................       if (input(PIN_D0) == 0){while(input(PIN_D0) == 0);k='1';}; 
+06D6:  BSF    03.5
+06D7:  BSF    08.0
+06D8:  BCF    03.5
+06D9:  BTFSC  08.0
+06DA:  GOTO   6E2
+06DB:  BSF    03.5
+06DC:  BSF    08.0
+06DD:  BCF    03.5
+06DE:  BTFSS  08.0
+06DF:  GOTO   6DB
+06E0:  MOVLW  31
+06E1:  MOVWF  6A
+....................       if (input(PIN_D1) == 0){while(input(PIN_D1) == 0);k='4';}; 
+06E2:  BSF    03.5
+06E3:  BSF    08.1
+06E4:  BCF    03.5
+06E5:  BTFSC  08.1
+06E6:  GOTO   6EE
+06E7:  BSF    03.5
+06E8:  BSF    08.1
+06E9:  BCF    03.5
+06EA:  BTFSS  08.1
+06EB:  GOTO   6E7
+06EC:  MOVLW  34
+06ED:  MOVWF  6A
+....................       if (input(PIN_D2) == 0){while(input(PIN_D2) == 0);k='7';}; 
+06EE:  BSF    03.5
+06EF:  BSF    08.2
+06F0:  BCF    03.5
+06F1:  BTFSC  08.2
+06F2:  GOTO   6FA
+06F3:  BSF    03.5
+06F4:  BSF    08.2
+06F5:  BCF    03.5
+06F6:  BTFSS  08.2
+06F7:  GOTO   6F3
+06F8:  MOVLW  37
+06F9:  MOVWF  6A
+....................       if (input(PIN_D3) == 0){while(input(PIN_D3) == 0);k='*';}; 
+06FA:  BSF    03.5
+06FB:  BSF    08.3
+06FC:  BCF    03.5
+06FD:  BTFSC  08.3
+06FE:  GOTO   706
+06FF:  BSF    03.5
+0700:  BSF    08.3
+0701:  BCF    03.5
+0702:  BTFSS  08.3
+0703:  GOTO   6FF
+0704:  MOVLW  2A
+0705:  MOVWF  6A
+....................       //habilita segunda coluna do teclado 
+....................       output_high(PIN_B0);output_low(PIN_B1);output_high(PIN_B2);output_high(PIN_B3); 
+0706:  BSF    03.5
+0707:  BCF    06.0
+0708:  BCF    03.5
+0709:  BSF    06.0
+070A:  BSF    03.5
+070B:  BCF    06.1
+070C:  BCF    03.5
+070D:  BCF    06.1
+070E:  BSF    03.5
+070F:  BCF    06.2
+0710:  BCF    03.5
+0711:  BSF    06.2
+0712:  BSF    03.5
+0713:  BCF    06.3
+0714:  BCF    03.5
+0715:  BSF    06.3
+....................       delay_ms(20);       
+0716:  MOVLW  14
+0717:  MOVWF  6F
+0718:  CALL   23D
+....................       if (input(PIN_D0) == 0){while(input(PIN_D0) == 0);k='2';}; 
+0719:  BSF    03.5
+071A:  BSF    08.0
+071B:  BCF    03.5
+071C:  BTFSC  08.0
+071D:  GOTO   725
+071E:  BSF    03.5
+071F:  BSF    08.0
+0720:  BCF    03.5
+0721:  BTFSS  08.0
+0722:  GOTO   71E
+0723:  MOVLW  32
+0724:  MOVWF  6A
+....................       if (input(PIN_D1) == 0){while(input(PIN_D1) == 0);k='5';}; 
+0725:  BSF    03.5
+0726:  BSF    08.1
+0727:  BCF    03.5
+0728:  BTFSC  08.1
+0729:  GOTO   731
+072A:  BSF    03.5
+072B:  BSF    08.1
+072C:  BCF    03.5
+072D:  BTFSS  08.1
+072E:  GOTO   72A
+072F:  MOVLW  35
+0730:  MOVWF  6A
+....................       if (input(PIN_D2) == 0){while(input(PIN_D2) == 0);k='8';}; 
+0731:  BSF    03.5
+0732:  BSF    08.2
+0733:  BCF    03.5
+0734:  BTFSC  08.2
+0735:  GOTO   73D
+0736:  BSF    03.5
+0737:  BSF    08.2
+0738:  BCF    03.5
+0739:  BTFSS  08.2
+073A:  GOTO   736
+073B:  MOVLW  38
+073C:  MOVWF  6A
+....................       if (input(PIN_D3) == 0){while(input(PIN_D3) == 0);k='0';}; 
+073D:  BSF    03.5
+073E:  BSF    08.3
+073F:  BCF    03.5
+0740:  BTFSC  08.3
+0741:  GOTO   749
+0742:  BSF    03.5
+0743:  BSF    08.3
+0744:  BCF    03.5
+0745:  BTFSS  08.3
+0746:  GOTO   742
+0747:  MOVLW  30
+0748:  MOVWF  6A
+....................        
+....................       //habilita terceira coluna do teclado 
+....................       output_high(PIN_B0);output_high(PIN_B1);output_low(PIN_B2);output_high(PIN_B3); 
+0749:  BSF    03.5
+074A:  BCF    06.0
+074B:  BCF    03.5
+074C:  BSF    06.0
+074D:  BSF    03.5
+074E:  BCF    06.1
+074F:  BCF    03.5
+0750:  BSF    06.1
+0751:  BSF    03.5
+0752:  BCF    06.2
+0753:  BCF    03.5
+0754:  BCF    06.2
+0755:  BSF    03.5
+0756:  BCF    06.3
+0757:  BCF    03.5
+0758:  BSF    06.3
+....................       delay_ms(20);       
+0759:  MOVLW  14
+075A:  MOVWF  6F
+075B:  CALL   23D
+....................       if (input(PIN_D0) == 0){while(input(PIN_D0) == 0);k='3';}; 
+075C:  BSF    03.5
+075D:  BSF    08.0
+075E:  BCF    03.5
+075F:  BTFSC  08.0
+0760:  GOTO   768
+0761:  BSF    03.5
+0762:  BSF    08.0
+0763:  BCF    03.5
+0764:  BTFSS  08.0
+0765:  GOTO   761
+0766:  MOVLW  33
+0767:  MOVWF  6A
+....................       if (input(PIN_D1) == 0){while(input(PIN_D1) == 0);k='6';}; 
+0768:  BSF    03.5
+0769:  BSF    08.1
+076A:  BCF    03.5
+076B:  BTFSC  08.1
+076C:  GOTO   774
+076D:  BSF    03.5
+076E:  BSF    08.1
+076F:  BCF    03.5
+0770:  BTFSS  08.1
+0771:  GOTO   76D
+0772:  MOVLW  36
+0773:  MOVWF  6A
+....................       if (input(PIN_D2) == 0){while(input(PIN_D2) == 0);k='9';}; 
+0774:  BSF    03.5
+0775:  BSF    08.2
+0776:  BCF    03.5
+0777:  BTFSC  08.2
+0778:  GOTO   780
+0779:  BSF    03.5
+077A:  BSF    08.2
+077B:  BCF    03.5
+077C:  BTFSS  08.2
+077D:  GOTO   779
+077E:  MOVLW  39
+077F:  MOVWF  6A
+....................       if (input(PIN_D3) == 0){while(input(PIN_D3) == 0);k='#';}; 
+0780:  BSF    03.5
+0781:  BSF    08.3
+0782:  BCF    03.5
+0783:  BTFSC  08.3
+0784:  GOTO   78C
+0785:  BSF    03.5
+0786:  BSF    08.3
+0787:  BCF    03.5
+0788:  BTFSS  08.3
+0789:  GOTO   785
+078A:  MOVLW  23
+078B:  MOVWF  6A
+....................   
+....................        //habilita quarta coluna do teclado 
+....................       output_high(PIN_B0);output_high(PIN_B1);output_high(PIN_B2);output_low(PIN_B3); 
+078C:  BSF    03.5
+078D:  BCF    06.0
+078E:  BCF    03.5
+078F:  BSF    06.0
+0790:  BSF    03.5
+0791:  BCF    06.1
+0792:  BCF    03.5
+0793:  BSF    06.1
+0794:  BSF    03.5
+0795:  BCF    06.2
+0796:  BCF    03.5
+0797:  BSF    06.2
+0798:  BSF    03.5
+0799:  BCF    06.3
+079A:  BCF    03.5
+079B:  BCF    06.3
+....................       delay_ms(20);       
+079C:  MOVLW  14
+079D:  MOVWF  6F
+079E:  CALL   23D
+....................       if (input(PIN_D0) == 0){while(input(PIN_D0) == 0);k='A';}; 
+079F:  BSF    03.5
+07A0:  BSF    08.0
+07A1:  BCF    03.5
+07A2:  BTFSC  08.0
+07A3:  GOTO   7AB
+07A4:  BSF    03.5
+07A5:  BSF    08.0
+07A6:  BCF    03.5
+07A7:  BTFSS  08.0
+07A8:  GOTO   7A4
+07A9:  MOVLW  41
+07AA:  MOVWF  6A
+....................       if (input(PIN_D1) == 0){while(input(PIN_D1) == 0);k='B';}; 
+07AB:  BSF    03.5
+07AC:  BSF    08.1
+07AD:  BCF    03.5
+07AE:  BTFSC  08.1
+07AF:  GOTO   7B7
+07B0:  BSF    03.5
+07B1:  BSF    08.1
+07B2:  BCF    03.5
+07B3:  BTFSS  08.1
+07B4:  GOTO   7B0
+07B5:  MOVLW  42
+07B6:  MOVWF  6A
+....................       if (input(PIN_D2) == 0){while(input(PIN_D2) == 0);k='C';}; 
+07B7:  BSF    03.5
+07B8:  BSF    08.2
+07B9:  BCF    03.5
+07BA:  BTFSC  08.2
+07BB:  GOTO   7C3
+07BC:  BSF    03.5
+07BD:  BSF    08.2
+07BE:  BCF    03.5
+07BF:  BTFSS  08.2
+07C0:  GOTO   7BC
+07C1:  MOVLW  43
+07C2:  MOVWF  6A
+....................       if (input(PIN_D3) == 0){while(input(PIN_D3) == 0);k='D';}; 
+07C3:  BSF    03.5
+07C4:  BSF    08.3
+07C5:  BCF    03.5
+07C6:  BTFSC  08.3
+07C7:  GOTO   7CF
+07C8:  BSF    03.5
+07C9:  BSF    08.3
+07CA:  BCF    03.5
+07CB:  BTFSS  08.3
+07CC:  GOTO   7C8
+07CD:  MOVLW  44
+07CE:  MOVWF  6A
+....................   
+....................       //printf (lcd_escreve,"\f saiu geral %u",k); 
+....................       //delay_ms(1000); 
+....................       delay_ms(5); 
+07CF:  MOVLW  05
+07D0:  MOVWF  6F
+07D1:  CALL   23D
+....................       to+=5; 
+07D2:  MOVLW  05
+07D3:  ADDWF  69,F
+....................   } 
+07D4:  GOTO   6B9
+....................    if(!k)k=255; 
+07D5:  MOVF   6A,F
+07D6:  BTFSS  03.2
+07D7:  GOTO   7DA
+07D8:  MOVLW  FF
+07D9:  MOVWF  6A
+....................   return k;   
+07DA:  MOVF   6A,W
+07DB:  MOVWF  78
+.................... } 
+....................  
+.................... #include "2401.c" 
+.................... /////////////////////////////////////////////////////////////////////////// 
+.................... ////   Library for a MicroChip 24LC01B configured for a x8 org         //// 
+.................... ////                                                                   //// 
+.................... ////   init_ext_eeprom();    Call before the other functions are used  //// 
+.................... ////                                                                   //// 
+.................... ////   write_ext_eeprom(a, d);  Write the byte d to the address a      //// 
+.................... ////                                                                   //// 
+.................... ////   d = read_ext_eeprom(a);  Read the byte d from the address a     //// 
+.................... ////                                                                   //// 
+.................... ////   b = ext_eeprom_ready();  Returns TRUE if the eeprom is ready    //// 
+.................... ////                            to receive opcodes                     //// 
+.................... ////                                                                   //// 
+.................... ////   The main program may define EEPROM_SDA                          //// 
+.................... ////   and EEPROM_SCL to override the defaults below.                  //// 
+.................... ////                                                                   //// 
+.................... ////                            Pin Layout                             //// 
+.................... ////   -----------------------------------------------------------     //// 
+.................... ////   |                                                         |     //// 
+.................... ////   | 1: NC   Not Connected | 8: VCC   +5V                    |     //// 
+.................... ////   |                       |                                 |     //// 
+.................... ////   | 2: NC   Not Connected | 7: WP    GND                    |     //// 
+.................... ////   |                       |                                 |     //// 
+.................... ////   | 3: NC   Not Connected | 6: SCL   EEPROM_SCL and Pull-Up |     //// 
+.................... ////   |                       |                                 |     //// 
+.................... ////   | 4: VSS  GND           | 5: SDA   EEPROM_SDA and Pull-Up |     //// 
+.................... ////   -----------------------------------------------------------     //// 
+.................... ////                                                                   //// 
+.................... /////////////////////////////////////////////////////////////////////////// 
+.................... ////        (C) Copyright 1996, 2003 Custom Computer Services          //// 
+.................... //// This source code may only be used by licensed users of the CCS C  //// 
+.................... //// compiler.  This source code may only be distributed to other      //// 
+.................... //// licensed users of the CCS C compiler.  No other use, reproduction //// 
+.................... //// or distribution is permitted without written permission.          //// 
+.................... //// Derivative programs created using this software in object code    //// 
+.................... //// form are not restricted in any way.                               //// 
+.................... /////////////////////////////////////////////////////////////////////////// 
+....................  
+.................... #ifndef EEPROM_SDA 
+....................  
+.................... #define EEPROM_SDA  PIN_C4 
+.................... #define EEPROM_SCL  PIN_C3 
+....................  
+.................... #endif 
+....................  
+....................  
+.................... #use i2c(master, sda=EEPROM_SDA, scl=EEPROM_SCL) 
+*
+0368:  MOVLW  08
+0369:  MOVWF  78
+036A:  MOVLW  04
+036B:  MOVWF  77
+036C:  DECFSZ 77,F
+036D:  GOTO   36C
+036E:  BCF    07.3
+036F:  BCF    27.3
+0370:  MOVF   27,W
+0371:  BSF    03.5
+0372:  MOVWF  07
+0373:  MOVLW  03
+0374:  MOVWF  77
+0375:  DECFSZ 77,F
+0376:  GOTO   375
+0377:  RLF    73,F
+0378:  BCF    03.5
+0379:  BCF    07.4
+037A:  BTFSS  03.0
+037B:  GOTO   382
+037C:  BSF    27.4
+037D:  MOVF   27,W
+037E:  BSF    03.5
+037F:  MOVWF  07
+0380:  GOTO   386
+0381:  BCF    03.5
+0382:  BCF    27.4
+0383:  MOVF   27,W
+0384:  BSF    03.5
+0385:  MOVWF  07
+0386:  NOP
+0387:  BCF    03.5
+0388:  BSF    27.3
+0389:  MOVF   27,W
+038A:  BSF    03.5
+038B:  MOVWF  07
+038C:  BCF    03.5
+038D:  BTFSS  07.3
+038E:  GOTO   38D
+038F:  DECFSZ 78,F
+0390:  GOTO   36A
+0391:  MOVLW  04
+0392:  MOVWF  77
+0393:  DECFSZ 77,F
+0394:  GOTO   393
+0395:  BCF    07.3
+0396:  BCF    27.3
+0397:  MOVF   27,W
+0398:  BSF    03.5
+0399:  MOVWF  07
+039A:  NOP
+039B:  BCF    03.5
+039C:  BSF    27.4
+039D:  MOVF   27,W
+039E:  BSF    03.5
+039F:  MOVWF  07
+03A0:  MOVLW  03
+03A1:  MOVWF  77
+03A2:  DECFSZ 77,F
+03A3:  GOTO   3A2
+03A4:  MOVLW  03
+03A5:  MOVWF  77
+03A6:  DECFSZ 77,F
+03A7:  GOTO   3A6
+03A8:  BCF    03.5
+03A9:  BSF    27.3
+03AA:  MOVF   27,W
+03AB:  BSF    03.5
+03AC:  MOVWF  07
+03AD:  BCF    03.5
+03AE:  BTFSS  07.3
+03AF:  GOTO   3AE
+03B0:  CLRF   78
+03B1:  MOVLW  03
+03B2:  MOVWF  77
+03B3:  DECFSZ 77,F
+03B4:  GOTO   3B3
+03B5:  BTFSC  07.4
+03B6:  BSF    78.0
+03B7:  BCF    07.3
+03B8:  BCF    27.3
+03B9:  MOVF   27,W
+03BA:  BSF    03.5
+03BB:  MOVWF  07
+03BC:  BCF    03.5
+03BD:  BCF    07.4
+03BE:  BCF    27.4
+03BF:  MOVF   27,W
+03C0:  BSF    03.5
+03C1:  MOVWF  07
+03C2:  BCF    03.5
+03C3:  RETURN
+*
+04AE:  MOVLW  08
+04AF:  MOVWF  73
+04B0:  MOVF   77,W
+04B1:  MOVWF  74
+04B2:  BSF    27.4
+04B3:  MOVF   27,W
+04B4:  BSF    03.5
+04B5:  MOVWF  07
+04B6:  MOVLW  03
+04B7:  MOVWF  77
+04B8:  DECFSZ 77,F
+04B9:  GOTO   4B8
+04BA:  BCF    03.5
+04BB:  BSF    27.3
+04BC:  MOVF   27,W
+04BD:  BSF    03.5
+04BE:  MOVWF  07
+04BF:  BCF    03.5
+04C0:  BTFSS  07.3
+04C1:  GOTO   4C0
+04C2:  BTFSC  07.4
+04C3:  BSF    03.0
+04C4:  BTFSS  07.4
+04C5:  BCF    03.0
+04C6:  RLF    78,F
+04C7:  MOVLW  04
+04C8:  MOVWF  77
+04C9:  DECFSZ 77,F
+04CA:  GOTO   4C9
+04CB:  BCF    27.3
+04CC:  MOVF   27,W
+04CD:  BSF    03.5
+04CE:  MOVWF  07
+04CF:  BCF    03.5
+04D0:  BCF    07.3
+04D1:  DECFSZ 73,F
+04D2:  GOTO   4B2
+04D3:  BSF    27.4
+04D4:  MOVF   27,W
+04D5:  BSF    03.5
+04D6:  MOVWF  07
+04D7:  MOVLW  03
+04D8:  MOVWF  77
+04D9:  DECFSZ 77,F
+04DA:  GOTO   4D9
+04DB:  BCF    03.5
+04DC:  BCF    07.4
+04DD:  MOVF   74,W
+04DE:  BTFSC  03.2
+04DF:  GOTO   4E5
+04E0:  BCF    27.4
+04E1:  MOVF   27,W
+04E2:  BSF    03.5
+04E3:  MOVWF  07
+04E4:  BCF    03.5
+04E5:  NOP
+04E6:  BSF    27.3
+04E7:  MOVF   27,W
+04E8:  BSF    03.5
+04E9:  MOVWF  07
+04EA:  BCF    03.5
+04EB:  BTFSS  07.3
+04EC:  GOTO   4EB
+04ED:  MOVLW  04
+04EE:  MOVWF  77
+04EF:  DECFSZ 77,F
+04F0:  GOTO   4EF
+04F1:  BCF    07.3
+04F2:  BCF    27.3
+04F3:  MOVF   27,W
+04F4:  BSF    03.5
+04F5:  MOVWF  07
+04F6:  MOVLW  03
+04F7:  MOVWF  77
+04F8:  DECFSZ 77,F
+04F9:  GOTO   4F8
+04FA:  BCF    03.5
+04FB:  BCF    07.4
+04FC:  BCF    27.4
+04FD:  MOVF   27,W
+04FE:  BSF    03.5
+04FF:  MOVWF  07
+....................  
+.................... #define EEPROM_ADDRESS BYTE 
+.................... #define EEPROM_SIZE    128 
+....................  
+.................... void init_ext_eeprom() { 
+....................    output_float(EEPROM_SCL); 
+*
+0230:  BSF    27.3
+0231:  MOVF   27,W
+0232:  BSF    03.5
+0233:  MOVWF  07
+....................    output_float(EEPROM_SDA); 
+0234:  BCF    03.5
+0235:  BSF    27.4
+0236:  MOVF   27,W
+0237:  BSF    03.5
+0238:  MOVWF  07
+.................... } 
+0239:  BCF    03.5
+023A:  BSF    0A.3
+023B:  BCF    0A.4
+023C:  GOTO   21E (RETURN)
+....................  
+.................... BOOLEAN ext_eeprom_ready() { 
+....................    int1 ack; 
+....................    i2c_start();            // If the write command is acknowledged, 
+*
+03C4:  BSF    27.4
+03C5:  MOVF   27,W
+03C6:  BSF    03.5
+03C7:  MOVWF  07
+03C8:  MOVLW  04
+03C9:  MOVWF  77
+03CA:  DECFSZ 77,F
+03CB:  GOTO   3CA
+03CC:  BCF    03.5
+03CD:  BSF    27.3
+03CE:  MOVF   27,W
+03CF:  BSF    03.5
+03D0:  MOVWF  07
+03D1:  MOVLW  03
+03D2:  MOVWF  77
+03D3:  DECFSZ 77,F
+03D4:  GOTO   3D3
+03D5:  BCF    03.5
+03D6:  BCF    07.4
+03D7:  BCF    27.4
+03D8:  MOVF   27,W
+03D9:  BSF    03.5
+03DA:  MOVWF  07
+03DB:  MOVLW  04
+03DC:  MOVWF  77
+03DD:  DECFSZ 77,F
+03DE:  GOTO   3DD
+03DF:  BCF    03.5
+03E0:  BCF    07.3
+03E1:  BCF    27.3
+03E2:  MOVF   27,W
+03E3:  BSF    03.5
+03E4:  MOVWF  07
+....................    ack = i2c_write(0xa0);  // then the device is ready. 
+03E5:  MOVLW  A0
+03E6:  MOVWF  73
+03E7:  BCF    03.5
+03E8:  CALL   368
+03E9:  MOVF   78,W
+03EA:  BCF    72.0
+03EB:  BTFSC  78.0
+03EC:  BSF    72.0
+....................    i2c_stop(); 
+03ED:  BCF    27.4
+03EE:  MOVF   27,W
+03EF:  BSF    03.5
+03F0:  MOVWF  07
+03F1:  NOP
+03F2:  BCF    03.5
+03F3:  BSF    27.3
+03F4:  MOVF   27,W
+03F5:  BSF    03.5
+03F6:  MOVWF  07
+03F7:  BCF    03.5
+03F8:  BTFSS  07.3
+03F9:  GOTO   3F8
+03FA:  MOVLW  04
+03FB:  MOVWF  77
+03FC:  DECFSZ 77,F
+03FD:  GOTO   3FC
+03FE:  GOTO   3FF
+03FF:  NOP
+0400:  BSF    27.4
+0401:  MOVF   27,W
+0402:  BSF    03.5
+0403:  MOVWF  07
+0404:  MOVLW  04
+0405:  MOVWF  77
+0406:  DECFSZ 77,F
+0407:  GOTO   406
+....................    return !ack; 
+0408:  MOVLW  00
+0409:  BTFSS  72.0
+040A:  MOVLW  01
+040B:  MOVWF  78
+.................... } 
+040C:  BCF    03.5
+040D:  RETURN
+....................  
+.................... void write_ext_eeprom(BYTE address, BYTE data) { 
+....................    while(!ext_eeprom_ready()); 
+040E:  CALL   3C4
+040F:  MOVF   78,F
+0410:  BTFSC  03.2
+0411:  GOTO   40E
+....................    i2c_start(); 
+0412:  BSF    27.4
+0413:  MOVF   27,W
+0414:  BSF    03.5
+0415:  MOVWF  07
+0416:  MOVLW  04
+0417:  MOVWF  77
+0418:  DECFSZ 77,F
+0419:  GOTO   418
+041A:  BCF    03.5
+041B:  BSF    27.3
+041C:  MOVF   27,W
+041D:  BSF    03.5
+041E:  MOVWF  07
+041F:  MOVLW  03
+0420:  MOVWF  77
+0421:  DECFSZ 77,F
+0422:  GOTO   421
+0423:  BCF    03.5
+0424:  BCF    07.4
+0425:  BCF    27.4
+0426:  MOVF   27,W
+0427:  BSF    03.5
+0428:  MOVWF  07
+0429:  MOVLW  04
+042A:  MOVWF  77
+042B:  DECFSZ 77,F
+042C:  GOTO   42B
+042D:  BCF    03.5
+042E:  BCF    07.3
+042F:  BCF    27.3
+0430:  MOVF   27,W
+0431:  BSF    03.5
+0432:  MOVWF  07
+....................    i2c_write(0xa0); 
+0433:  MOVLW  A0
+0434:  MOVWF  73
+0435:  BCF    03.5
+0436:  CALL   368
+....................    i2c_write(address); 
+0437:  MOVF   6C,W
+0438:  MOVWF  73
+0439:  CALL   368
+....................    i2c_write(data); 
+043A:  MOVF   6D,W
+043B:  MOVWF  73
+043C:  CALL   368
+....................    i2c_stop(); 
+043D:  BCF    27.4
+043E:  MOVF   27,W
+043F:  BSF    03.5
+0440:  MOVWF  07
+0441:  NOP
+0442:  BCF    03.5
+0443:  BSF    27.3
+0444:  MOVF   27,W
+0445:  BSF    03.5
+0446:  MOVWF  07
+0447:  BCF    03.5
+0448:  BTFSS  07.3
+0449:  GOTO   448
+044A:  MOVLW  04
+044B:  MOVWF  77
+044C:  DECFSZ 77,F
+044D:  GOTO   44C
+044E:  GOTO   44F
+044F:  NOP
+0450:  BSF    27.4
+0451:  MOVF   27,W
+0452:  BSF    03.5
+0453:  MOVWF  07
+0454:  MOVLW  04
+0455:  MOVWF  77
+0456:  DECFSZ 77,F
+0457:  GOTO   456
+.................... } 
+0458:  BCF    03.5
+0459:  RETURN
+....................  
+....................  
+.................... BYTE read_ext_eeprom(BYTE address) { 
+....................    BYTE data; 
+....................  
+....................    while(!ext_eeprom_ready()); 
+045A:  CALL   3C4
+045B:  MOVF   78,F
+045C:  BTFSC  03.2
+045D:  GOTO   45A
+....................    i2c_start(); 
+045E:  BSF    27.4
+045F:  MOVF   27,W
+0460:  BSF    03.5
+0461:  MOVWF  07
+0462:  MOVLW  04
+0463:  MOVWF  77
+0464:  DECFSZ 77,F
+0465:  GOTO   464
+0466:  BCF    03.5
+0467:  BSF    27.3
+0468:  MOVF   27,W
+0469:  BSF    03.5
+046A:  MOVWF  07
+046B:  MOVLW  03
+046C:  MOVWF  77
+046D:  DECFSZ 77,F
+046E:  GOTO   46D
+046F:  BCF    03.5
+0470:  BCF    07.4
+0471:  BCF    27.4
+0472:  MOVF   27,W
+0473:  BSF    03.5
+0474:  MOVWF  07
+0475:  MOVLW  04
+0476:  MOVWF  77
+0477:  DECFSZ 77,F
+0478:  GOTO   477
+0479:  BCF    03.5
+047A:  BCF    07.3
+047B:  BCF    27.3
+047C:  MOVF   27,W
+047D:  BSF    03.5
+047E:  MOVWF  07
+....................    i2c_write(0xa0); 
+047F:  MOVLW  A0
+0480:  MOVWF  73
+0481:  BCF    03.5
+0482:  CALL   368
+....................    i2c_write(address); 
+0483:  MOVF   70,W
+0484:  MOVWF  73
+0485:  CALL   368
+....................    i2c_start(); 
+0486:  BSF    27.4
+0487:  MOVF   27,W
+0488:  BSF    03.5
+0489:  MOVWF  07
+048A:  MOVLW  04
+048B:  MOVWF  77
+048C:  DECFSZ 77,F
+048D:  GOTO   48C
+048E:  BCF    03.5
+048F:  BSF    27.3
+0490:  MOVF   27,W
+0491:  BSF    03.5
+0492:  MOVWF  07
+0493:  MOVLW  03
+0494:  MOVWF  77
+0495:  DECFSZ 77,F
+0496:  GOTO   495
+0497:  BCF    03.5
+0498:  BTFSS  07.3
+0499:  GOTO   498
+049A:  BCF    07.4
+049B:  BCF    27.4
+049C:  MOVF   27,W
+049D:  BSF    03.5
+049E:  MOVWF  07
+049F:  MOVLW  04
+04A0:  MOVWF  77
+04A1:  DECFSZ 77,F
+04A2:  GOTO   4A1
+04A3:  BCF    03.5
+04A4:  BCF    07.3
+04A5:  BCF    27.3
+04A6:  MOVF   27,W
+04A7:  BSF    03.5
+04A8:  MOVWF  07
+....................    i2c_write(0xa1); 
+04A9:  MOVLW  A1
+04AA:  MOVWF  73
+04AB:  BCF    03.5
+04AC:  CALL   368
+....................    data=i2c_read(0); 
+04AD:  CLRF   77
+*
+0500:  MOVF   78,W
+0501:  MOVWF  71
+....................    i2c_stop(); 
+0502:  BCF    03.5
+0503:  BCF    27.4
+0504:  MOVF   27,W
+0505:  BSF    03.5
+0506:  MOVWF  07
+0507:  NOP
+0508:  BCF    03.5
+0509:  BSF    27.3
+050A:  MOVF   27,W
+050B:  BSF    03.5
+050C:  MOVWF  07
+050D:  BCF    03.5
+050E:  BTFSS  07.3
+050F:  GOTO   50E
+0510:  MOVLW  04
+0511:  MOVWF  77
+0512:  DECFSZ 77,F
+0513:  GOTO   512
+0514:  GOTO   515
+0515:  NOP
+0516:  BSF    27.4
+0517:  MOVF   27,W
+0518:  BSF    03.5
+0519:  MOVWF  07
+051A:  MOVLW  04
+051B:  MOVWF  77
+051C:  DECFSZ 77,F
+051D:  GOTO   51C
+....................    return(data); 
+051E:  MOVF   71,W
+051F:  MOVWF  78
+.................... } 
+0520:  BCF    03.5
+0521:  RETURN
+....................  
+....................  
+.................... #define RX_BUFFER_SIZE 13  
+.................... int8 rx_wr_index = 0;  
+.................... int8 lock_state = 0, rxd,lido, valid_data_count;  
+.................... unsigned int8 rx_buffer[RX_BUFFER_SIZE]; 
+.................... int1 data_avail = FALSE, got_id = FALSE,del = FALSE,got_del=FALSE,edit,got_edit=FALSE,got_all_users=FALSE,data_users=FALSE; 
+....................  
+.................... //============================================================== 
+....................  
+....................   
+....................  
+....................  
+.................... //======================= ProtÃ³tipos =============================== 
+.................... void handleVerifySignInAdm(void); 
+.................... void signIn(void); 
+.................... char saveCharPressByUser (void);  
+.................... void saveSignInEeprom(void); 
+.................... unsigned int16 searchFreePositionEeprom(void); 
+.................... unsigned int16 searchXPositionOnEeprom(void); 
+.................... void handeInputsIDByUser(void); 
+.................... void deleteIDonRAM(void); 
+.................... void handleSavePinOnRam(void); 
+.................... void deletePINonRAM(void); 
+.................... void home(void); 
+.................... void menu(void); 
+.................... int getIdADMOnEeprom(void); 
+.................... int getPinADMOnEeprom(void); 
+.................... void clearRAM(void); 
+.................... int checkId(void); 
+.................... int checkPIN(void) ; 
+.................... void deleteUserOnEeprom(void); 
+.................... int getQtdUsersOnEeprom(void); 
+.................... void deleteUser(void); 
+.................... void deleteUserEeprom(void); 
+.................... int checkByPc(void); 
+.................... void handleDeleteUserOnEeprom(void); 
+.................... void editUserEeprom(void); 
+.................... int checkExistIDOnEeprom(void); 
+.................... void deleteUserOnEeprom(void); 
+.................... void handleEditUser(void); 
+.................... void telaEdicao(void); 
+.................... void receberBancoDeDados(void); 
+.................... void saveDataBaseOnEeprom (void); 
+.................... //==================================================================== 
+....................  
+....................  
+.................... //======================VariÃ¡veis globais/============================ 
+....................  
+.................... const char admMenu[3][10] = {"Cadastrar","Deletar","Editar"}; 
+.................... int indexArrayDigitUser; // Essa var funciona como index do vetor que armazena oque o usuario digitou. 
+.................... unsigned int16 i = 0; 
+.................... unsigned char  memoryUserPosition[8];   
+.................... int firstAdm; 
+.................... char tecla; 
+.................... int screen = 0; 
+.................... int savePositionForValidID=1; 
+.................... int isUserOk;  
+.................... int deleteByPIC; 
+.................... int cadastro = 0; 
+.................... int qtdDeUsuariosJaCadastrado=1; 
+....................  
+....................  
+....................  
+.................... char received;  
+.................... int1 interrupt_flag=0; 
+.................... typedef struct   
+.................... { 
+.................... char id[3]; 
+.................... char senha[4];  
+.................... char status;  
+....................  
+.................... } Cliente;   
+.................... Cliente C1;  
+....................  
+....................  
+.................... /* 
+....................    0 = home 
+....................    1 = menu 
+.................... */ 
+....................  
+.................... //========================================================================== 
+....................  
+....................  
+.................... //========================PORTA SERIAL====================================== 
+....................  
+.................... #int_RDA  
+.................... void RDA_isr(void){  
+....................     rx_buffer[rx_wr_index] = getc(); 
+*
+0054:  MOVLW  2D
+0055:  ADDWF  28,W
+0056:  MOVWF  04
+0057:  BCF    03.7
+0058:  BTFSS  0C.5
+0059:  GOTO   058
+005A:  MOVF   1A,W
+005B:  MOVWF  00
+....................     rxd = rx_buffer[rx_wr_index]; 
+005C:  MOVLW  2D
+005D:  ADDWF  28,W
+005E:  MOVWF  04
+005F:  BCF    03.7
+0060:  MOVF   00,W
+0061:  MOVWF  2A
+....................     rx_wr_index++; 
+0062:  INCF   28,F
+....................  
+....................     if (rx_wr_index > RX_BUFFER_SIZE) { 
+0063:  MOVF   28,W
+0064:  SUBLW  0D
+0065:  BTFSC  03.0
+0066:  GOTO   068
+....................      rx_wr_index = 0; 
+0067:  CLRF   28
+....................     } 
+....................  
+....................     if (rxd == 'C'){      
+0068:  MOVF   2A,W
+0069:  SUBLW  43
+006A:  BTFSS  03.2
+006B:  GOTO   06F
+....................         got_id = TRUE;  
+006C:  BSF    3A.1
+....................         valid_data_count = 0;  
+006D:  CLRF   2C
+....................         rx_wr_index = 0; 
+006E:  CLRF   28
+....................     } 
+....................     if (got_id  && valid_data_count++ >= 8){ 
+006F:  BTFSS  3A.1
+0070:  GOTO   078
+0071:  MOVF   2C,W
+0072:  INCF   2C,F
+0073:  SUBLW  07
+0074:  BTFSC  03.0
+0075:  GOTO   078
+....................         data_avail = TRUE; 
+0076:  BSF    3A.0
+....................         got_id = FALSE; 
+0077:  BCF    3A.1
+....................     } 
+....................  
+....................  
+....................     if (rxd == 'K'){      
+0078:  MOVF   2A,W
+0079:  SUBLW  4B
+007A:  BTFSS  03.2
+007B:  GOTO   07F
+....................         got_all_users = TRUE;  
+007C:  BSF    3A.6
+....................         valid_data_count = 0;  
+007D:  CLRF   2C
+....................         rx_wr_index = 0; 
+007E:  CLRF   28
+....................     } 
+....................     if (got_all_users  && valid_data_count++ >= 8){ 
+007F:  BTFSS  3A.6
+0080:  GOTO   088
+0081:  MOVF   2C,W
+0082:  INCF   2C,F
+0083:  SUBLW  07
+0084:  BTFSC  03.0
+0085:  GOTO   088
+....................         data_users = TRUE; 
+0086:  BSF    3A.7
+....................         got_all_users = FALSE; 
+0087:  BCF    3A.6
+....................     } 
+....................  
+....................      
+....................     if (rxd == 'D'){      
+0088:  MOVF   2A,W
+0089:  SUBLW  44
+008A:  BTFSS  03.2
+008B:  GOTO   090
+....................         got_del = TRUE;  
+008C:  BSF    3A.3
+....................         valid_data_count = 0;  
+008D:  CLRF   2C
+....................         rx_wr_index = 0; 
+008E:  CLRF   28
+....................     }else if(got_del && valid_data_count++ >=2) { 
+008F:  GOTO   099
+0090:  BTFSS  3A.3
+0091:  GOTO   099
+0092:  MOVF   2C,W
+0093:  INCF   2C,F
+0094:  SUBLW  01
+0095:  BTFSC  03.0
+0096:  GOTO   099
+....................         del = TRUE; 
+0097:  BSF    3A.2
+....................         got_del = FALSE; 
+0098:  BCF    3A.3
+....................     } 
+....................  
+....................     if (rxd == 'S'){      
+0099:  MOVF   2A,W
+009A:  SUBLW  53
+009B:  BTFSS  03.2
+009C:  GOTO   0A1
+....................         got_edit = TRUE;  
+009D:  BSF    3A.5
+....................         valid_data_count =0;  
+009E:  CLRF   2C
+....................         rx_wr_index = 0; 
+009F:  CLRF   28
+....................     }else if(got_edit && valid_data_count++ >=3) { 
+00A0:  GOTO   0AA
+00A1:  BTFSS  3A.5
+00A2:  GOTO   0AA
+00A3:  MOVF   2C,W
+00A4:  INCF   2C,F
+00A5:  SUBLW  02
+00A6:  BTFSC  03.0
+00A7:  GOTO   0AA
+....................         edit = TRUE; 
+00A8:  BSF    3A.4
+....................         got_edit = FALSE; 
+00A9:  BCF    3A.5
+....................     } 
+.................... } 
+....................  
+.................... //============================================================================ 
+....................  
+.................... #include "funcoesEeprom.c" 
+00AA:  BCF    0C.5
+00AB:  BCF    0A.3
+00AC:  BCF    0A.4
+00AD:  GOTO   01D
+.................... void saveDataBaseOnEeprom () { 
+....................   printf(lcd_escreve,"\fBaixando BD"); 
+*
+0687:  MOVLW  AE
+0688:  BSF    03.6
+0689:  MOVWF  0D
+068A:  MOVLW  00
+068B:  MOVWF  0F
+068C:  BCF    03.6
+068D:  CALL   314
+....................   int j; 
+....................   int indexMemoryRAM = 0; 
+....................   int firstUser = 1 ; 
+068E:  CLRF   69
+068F:  MOVLW  01
+0690:  MOVWF  6A
+....................  
+....................    
+....................   for( j= qtdDeUsuariosJaCadastrado*8 ; j<=qtdDeUsuariosJaCadastrado*8+7 ; j++) { 
+0691:  RLF    4D,W
+0692:  MOVWF  68
+0693:  RLF    68,F
+0694:  RLF    68,F
+0695:  MOVLW  F8
+0696:  ANDWF  68,F
+0697:  RLF    4D,W
+0698:  MOVWF  77
+0699:  RLF    77,F
+069A:  RLF    77,F
+069B:  MOVLW  F8
+069C:  ANDWF  77,F
+069D:  MOVF   77,W
+069E:  ADDLW  07
+069F:  SUBWF  68,W
+06A0:  BTFSC  03.2
+06A1:  GOTO   6A4
+06A2:  BTFSC  03.0
+06A3:  GOTO   6B2
+....................     write_ext_eeprom(j,rx_buffer[indexMemoryRAM]); 
+06A4:  MOVLW  2D
+06A5:  ADDWF  69,W
+06A6:  MOVWF  04
+06A7:  BCF    03.7
+06A8:  MOVF   00,W
+06A9:  MOVWF  6B
+06AA:  MOVF   68,W
+06AB:  MOVWF  6C
+06AC:  MOVF   6B,W
+06AD:  MOVWF  6D
+06AE:  CALL   40E
+....................     indexMemoryRAM++; 
+06AF:  INCF   69,F
+....................   } 
+06B0:  INCF   68,F
+06B1:  GOTO   697
+....................    
+....................   firstUser= 0; 
+06B2:  CLRF   6A
+....................   qtdDeUsuariosJaCadastrado++; 
+06B3:  INCF   4D,F
+....................   data_users=FALSE; 
+06B4:  BCF    3A.7
+....................  
+.................... } 
+....................  
+.................... void handleDeleteUserOnEeprom(){ 
+....................   inicio: 
+....................   printf(lcd_escreve,"\fID para Deletar:\r"); 
+*
+0CBD:  MOVLW  B5
+0CBE:  BSF    03.6
+0CBF:  MOVWF  0D
+0CC0:  MOVLW  00
+0CC1:  MOVWF  0F
+0CC2:  BCF    0A.3
+0CC3:  BCF    03.6
+0CC4:  CALL   314
+0CC5:  BSF    0A.3
+....................   indexArrayDigitUser = 0; 
+0CC6:  CLRF   3B
+....................   int exit = 0; 
+0CC7:  CLRF   64
+....................   while(!exit) { 
+0CC8:  MOVF   64,F
+0CC9:  BTFSS  03.2
+0CCA:  GOTO   54E
+....................     tecla = saveCharPressByUser(); 
+0CCB:  BCF    0A.3
+0CCC:  CALL   5DE
+0CCD:  BSF    0A.3
+0CCE:  MOVF   78,W
+0CCF:  MOVWF  47
+....................     switch (tecla) { 
+0CD0:  MOVF   47,W
+0CD1:  XORLW  41
+0CD2:  BTFSC  03.2
+0CD3:  GOTO   4DB
+0CD4:  XORLW  02
+0CD5:  BTFSC  03.2
+0CD6:  GOTO   534
+0CD7:  XORLW  69
+0CD8:  BTFSC  03.2
+0CD9:  GOTO   539
+0CDA:  GOTO   53C
+....................       case 'A': { 
+....................           if(memoryUserPosition[indexArrayDigitUser] <=0) { 
+0CDB:  MOVLW  3E
+0CDC:  ADDWF  3B,W
+0CDD:  MOVWF  04
+0CDE:  BCF    03.7
+0CDF:  MOVF   00,F
+0CE0:  BTFSS  03.2
+0CE1:  GOTO   4F6
+....................             printf(lcd_escreve,"\fCampo vazio"); 
+0CE2:  MOVLW  BF
+0CE3:  BSF    03.6
+0CE4:  MOVWF  0D
+0CE5:  MOVLW  00
+0CE6:  MOVWF  0F
+0CE7:  BCF    0A.3
+0CE8:  BCF    03.6
+0CE9:  CALL   314
+0CEA:  BSF    0A.3
+....................             delay_ms(1000); 
+0CEB:  MOVLW  04
+0CEC:  MOVWF  65
+0CED:  MOVLW  FA
+0CEE:  MOVWF  6F
+0CEF:  BCF    0A.3
+0CF0:  CALL   23D
+0CF1:  BSF    0A.3
+0CF2:  DECFSZ 65,F
+0CF3:  GOTO   4ED
+....................             goto inicio; 
+0CF4:  GOTO   4BD
+....................           }else { 
+0CF5:  GOTO   533
+....................             if(checkExistIDOnEeprom() == 1) { 
+0CF6:  CALL   153
+0CF7:  DECFSZ 78,W
+0CF8:  GOTO   520
+....................                 deleteUserOnEeprom(); 
+....................                 exit = 1;   
+*
+0D1D:  MOVLW  01
+0D1E:  MOVWF  64
+....................             }else { 
+0D1F:  GOTO   533
+....................                 printf(lcd_escreve,"\fID nao existe"); 
+0D20:  MOVLW  C6
+0D21:  BSF    03.6
+0D22:  MOVWF  0D
+0D23:  MOVLW  00
+0D24:  MOVWF  0F
+0D25:  BCF    0A.3
+0D26:  BCF    03.6
+0D27:  CALL   314
+0D28:  BSF    0A.3
+....................                 delay_ms(1000); 
+0D29:  MOVLW  04
+0D2A:  MOVWF  65
+0D2B:  MOVLW  FA
+0D2C:  MOVWF  6F
+0D2D:  BCF    0A.3
+0D2E:  CALL   23D
+0D2F:  BSF    0A.3
+0D30:  DECFSZ 65,F
+0D31:  GOTO   52B
+....................                 goto inicio; 
+0D32:  GOTO   4BD
+....................             } 
+....................           } 
+....................          break; 
+0D33:  GOTO   54D
+....................       } 
+....................       case 'C':  { 
+....................         indexArrayDigitUser = 0 ; 
+0D34:  CLRF   3B
+....................         deleteIDonRAM(); 
+0D35:  BCF    0A.3
+0D36:  CALL   7E2
+0D37:  BSF    0A.3
+....................         break; 
+0D38:  GOTO   54D
+....................       } 
+....................       case '*': { 
+....................          exit=1; 
+0D39:  MOVLW  01
+0D3A:  MOVWF  64
+....................          screen=1; // 1 = menu  
+0D3B:  MOVWF  48
+....................       } 
+....................       default: { 
+....................         if(indexArrayDigitUser<=2) { 
+0D3C:  MOVF   3B,W
+0D3D:  SUBLW  02
+0D3E:  BTFSS  03.0
+0D3F:  GOTO   54C
+....................           printf(lcd_escreve,"%c",tecla); 
+0D40:  MOVF   47,W
+0D41:  MOVWF  6E
+0D42:  BCF    0A.3
+0D43:  CALL   2DC
+0D44:  BSF    0A.3
+....................           memoryUserPosition[indexArrayDigitUser] = tecla; 
+0D45:  MOVLW  3E
+0D46:  ADDWF  3B,W
+0D47:  MOVWF  04
+0D48:  BCF    03.7
+0D49:  MOVF   47,W
+0D4A:  MOVWF  00
+....................           indexArrayDigitUser++; 
+0D4B:  INCF   3B,F
+....................         } 
+....................         break; 
+0D4C:  GOTO   54D
+....................       } 
+....................     } 
+....................   } 
+0D4D:  GOTO   4C8
+....................   //deleteUserEeprom(); 
+.................... }  
+....................  
+....................  
+....................  
+.................... void handleEditUser(){ 
+....................   inicio: 
+....................   printf(lcd_escreve,"\fID para editar:\r"); 
+*
+0D65:  MOVLW  CE
+0D66:  BSF    03.6
+0D67:  MOVWF  0D
+0D68:  MOVLW  00
+0D69:  MOVWF  0F
+0D6A:  BCF    0A.3
+0D6B:  BCF    03.6
+0D6C:  CALL   314
+0D6D:  BSF    0A.3
+....................   indexArrayDigitUser = 0; 
+0D6E:  CLRF   3B
+....................   int exit = 0; 
+0D6F:  CLRF   64
+....................   while(!exit) { 
+0D70:  MOVF   64,F
+0D71:  BTFSS  03.2
+0D72:  GOTO   618
+....................     tecla = saveCharPressByUser(); 
+0D73:  BCF    0A.3
+0D74:  CALL   5DE
+0D75:  BSF    0A.3
+0D76:  MOVF   78,W
+0D77:  MOVWF  47
+....................     switch (tecla) { 
+0D78:  MOVF   47,W
+0D79:  XORLW  41
+0D7A:  BTFSC  03.2
+0D7B:  GOTO   583
+0D7C:  XORLW  02
+0D7D:  BTFSC  03.2
+0D7E:  GOTO   5FE
+0D7F:  XORLW  69
+0D80:  BTFSC  03.2
+0D81:  GOTO   603
+0D82:  GOTO   606
+....................       case 'A': { 
+....................           if(memoryUserPosition[indexArrayDigitUser] <=0) { 
+0D83:  MOVLW  3E
+0D84:  ADDWF  3B,W
+0D85:  MOVWF  04
+0D86:  BCF    03.7
+0D87:  MOVF   00,F
+0D88:  BTFSS  03.2
+0D89:  GOTO   59E
+....................             printf(lcd_escreve,"\fCampo vazio"); 
+0D8A:  MOVLW  D7
+0D8B:  BSF    03.6
+0D8C:  MOVWF  0D
+0D8D:  MOVLW  00
+0D8E:  MOVWF  0F
+0D8F:  BCF    0A.3
+0D90:  BCF    03.6
+0D91:  CALL   314
+0D92:  BSF    0A.3
+....................             delay_ms(1000); 
+0D93:  MOVLW  04
+0D94:  MOVWF  65
+0D95:  MOVLW  FA
+0D96:  MOVWF  6F
+0D97:  BCF    0A.3
+0D98:  CALL   23D
+0D99:  BSF    0A.3
+0D9A:  DECFSZ 65,F
+0D9B:  GOTO   595
+....................             goto inicio; 
+0D9C:  GOTO   565
+....................           }else { 
+0D9D:  GOTO   5FD
+....................             if(checkExistIDOnEeprom() == 1) { 
+0D9E:  CALL   153
+0D9F:  DECFSZ 78,W
+0DA0:  GOTO   5EA
+....................                 telaEdicao(); 
+....................             }else { 
+*
+0DE9:  GOTO   5FD
+....................                 printf(lcd_escreve,"\fID nao existe"); 
+0DEA:  MOVLW  DE
+0DEB:  BSF    03.6
+0DEC:  MOVWF  0D
+0DED:  MOVLW  00
+0DEE:  MOVWF  0F
+0DEF:  BCF    0A.3
+0DF0:  BCF    03.6
+0DF1:  CALL   314
+0DF2:  BSF    0A.3
+....................                 delay_ms(1000); 
+0DF3:  MOVLW  04
+0DF4:  MOVWF  65
+0DF5:  MOVLW  FA
+0DF6:  MOVWF  6F
+0DF7:  BCF    0A.3
+0DF8:  CALL   23D
+0DF9:  BSF    0A.3
+0DFA:  DECFSZ 65,F
+0DFB:  GOTO   5F5
+....................                 goto inicio; 
+0DFC:  GOTO   565
+....................             } 
+....................           } 
+....................          break; 
+0DFD:  GOTO   617
+....................       } 
+....................       case 'C':  { 
+....................         indexArrayDigitUser = 0 ; 
+0DFE:  CLRF   3B
+....................         deleteIDonRAM(); 
+0DFF:  BCF    0A.3
+0E00:  CALL   7E2
+0E01:  BSF    0A.3
+....................         break; 
+0E02:  GOTO   617
+....................       } 
+....................       case '*': { 
+....................          exit=1; 
+0E03:  MOVLW  01
+0E04:  MOVWF  64
+....................          screen=1; // 1 = menu  
+0E05:  MOVWF  48
+....................       } 
+....................       default: { 
+....................         if(indexArrayDigitUser<=2) { 
+0E06:  MOVF   3B,W
+0E07:  SUBLW  02
+0E08:  BTFSS  03.0
+0E09:  GOTO   616
+....................           printf(lcd_escreve,"%c",tecla); 
+0E0A:  MOVF   47,W
+0E0B:  MOVWF  6E
+0E0C:  BCF    0A.3
+0E0D:  CALL   2DC
+0E0E:  BSF    0A.3
+....................           memoryUserPosition[indexArrayDigitUser] = tecla; 
+0E0F:  MOVLW  3E
+0E10:  ADDWF  3B,W
+0E11:  MOVWF  04
+0E12:  BCF    03.7
+0E13:  MOVF   47,W
+0E14:  MOVWF  00
+....................           indexArrayDigitUser++; 
+0E15:  INCF   3B,F
+....................         } 
+....................         break; 
+0E16:  GOTO   617
+....................       } 
+....................     } 
+....................   } 
+0E17:  GOTO   570
+....................   //deleteUserEeprom(); 
+.................... }  
+....................  
+....................  
+.................... void telaEdicao () { 
+....................   printf(lcd_escreve,"\fAlterar Status:\r"); 
+*
+0DA1:  MOVLW  E6
+0DA2:  BSF    03.6
+0DA3:  MOVWF  0D
+0DA4:  MOVLW  00
+0DA5:  MOVWF  0F
+0DA6:  BCF    0A.3
+0DA7:  BCF    03.6
+0DA8:  CALL   314
+0DA9:  BSF    0A.3
+....................   int exit = 0; 
+....................   char status; 
+0DAA:  CLRF   65
+....................   while(!exit) { 
+0DAB:  MOVF   65,F
+0DAC:  BTFSS  03.2
+0DAD:  GOTO   5CE
+....................     tecla = saveCharPressByUser(); 
+0DAE:  BCF    0A.3
+0DAF:  CALL   5DE
+0DB0:  BSF    0A.3
+0DB1:  MOVF   78,W
+0DB2:  MOVWF  47
+....................     switch (tecla) { 
+0DB3:  MOVF   47,W
+0DB4:  XORLW  31
+0DB5:  BTFSC  03.2
+0DB6:  GOTO   5BE
+0DB7:  XORLW  01
+0DB8:  BTFSC  03.2
+0DB9:  GOTO   5C1
+0DBA:  XORLW  71
+0DBB:  BTFSC  03.2
+0DBC:  GOTO   5C4
+0DBD:  GOTO   5C7
+....................       case '1': { 
+....................          status = '1'; 
+0DBE:  MOVLW  31
+0DBF:  MOVWF  66
+....................          break; 
+0DC0:  GOTO   5C8
+....................       } 
+....................       case '0': { 
+....................          status = '0'; 
+0DC1:  MOVLW  30
+0DC2:  MOVWF  66
+....................          break; 
+0DC3:  GOTO   5C8
+....................       } 
+....................       case 'A': { 
+....................          exit = 1; 
+0DC4:  MOVLW  01
+0DC5:  MOVWF  65
+....................          break; 
+0DC6:  GOTO   5C8
+....................       } 
+....................       default: { 
+....................         break; 
+0DC7:  GOTO   5C8
+....................       } 
+....................     } 
+....................     printf(lcd_escreve,"%c",tecla); 
+0DC8:  MOVF   47,W
+0DC9:  MOVWF  6E
+0DCA:  BCF    0A.3
+0DCB:  CALL   2DC
+0DCC:  BSF    0A.3
+....................   } 
+0DCD:  GOTO   5AB
+....................    
+....................    write_ext_eeprom(savePositionForValidID+7,status); 
+0DCE:  MOVLW  07
+0DCF:  ADDWF  49,W
+0DD0:  MOVWF  67
+0DD1:  MOVWF  6C
+0DD2:  MOVF   66,W
+0DD3:  MOVWF  6D
+0DD4:  BCF    0A.3
+0DD5:  CALL   40E
+0DD6:  BSF    0A.3
+....................    printf(lcd_escreve,"\f Editado",); 
+0DD7:  MOVLW  EF
+0DD8:  BSF    03.6
+0DD9:  MOVWF  0D
+0DDA:  MOVLW  00
+0DDB:  MOVWF  0F
+0DDC:  BCF    0A.3
+0DDD:  BCF    03.6
+0DDE:  CALL   314
+0DDF:  BSF    0A.3
+....................    delay_ms(1500); 
+0DE0:  MOVLW  06
+0DE1:  MOVWF  67
+0DE2:  MOVLW  FA
+0DE3:  MOVWF  6F
+0DE4:  BCF    0A.3
+0DE5:  CALL   23D
+0DE6:  BSF    0A.3
+0DE7:  DECFSZ 67,F
+0DE8:  GOTO   5E2
+....................  } 
+.................... int getIdADMOnEeprom(){ 
+*
+0B9B:  MOVLW  01
+0B9C:  MOVWF  64
+....................    int isEqual=1; 
+....................    int j; 
+....................    
+....................    for(j=0;j<=2;j++) { 
+0B9D:  CLRF   65
+0B9E:  MOVF   65,W
+0B9F:  SUBLW  02
+0BA0:  BTFSS  03.0
+0BA1:  GOTO   3B4
+....................      if(memoryUserPosition[j]!=  read_ext_eeprom(j)) { 
+0BA2:  MOVLW  3E
+0BA3:  ADDWF  65,W
+0BA4:  MOVWF  04
+0BA5:  BCF    03.7
+0BA6:  MOVF   00,W
+0BA7:  MOVWF  66
+0BA8:  MOVF   65,W
+0BA9:  MOVWF  70
+0BAA:  BCF    0A.3
+0BAB:  CALL   45A
+0BAC:  BSF    0A.3
+0BAD:  MOVF   78,W
+0BAE:  SUBWF  66,W
+0BAF:  BTFSC  03.2
+0BB0:  GOTO   3B2
+....................          isEqual = 0; 
+0BB1:  CLRF   64
+....................      } 
+....................    } 
+0BB2:  INCF   65,F
+0BB3:  GOTO   39E
+....................     
+....................    return isEqual; 
+0BB4:  MOVF   64,W
+0BB5:  MOVWF  78
+.................... } 
+....................  
+.................... int getPinADMOnEeprom(){ 
+*
+0BCE:  MOVLW  01
+0BCF:  MOVWF  64
+....................    int isEqual=1; 
+....................    int j; 
+....................    for(j=3;j<=6;j++) { 
+0BD0:  MOVLW  03
+0BD1:  MOVWF  65
+0BD2:  MOVF   65,W
+0BD3:  SUBLW  06
+0BD4:  BTFSS  03.0
+0BD5:  GOTO   3E8
+....................       if(memoryUserPosition[j] !=  read_ext_eeprom(j)) { 
+0BD6:  MOVLW  3E
+0BD7:  ADDWF  65,W
+0BD8:  MOVWF  04
+0BD9:  BCF    03.7
+0BDA:  MOVF   00,W
+0BDB:  MOVWF  66
+0BDC:  MOVF   65,W
+0BDD:  MOVWF  70
+0BDE:  BCF    0A.3
+0BDF:  CALL   45A
+0BE0:  BSF    0A.3
+0BE1:  MOVF   78,W
+0BE2:  SUBWF  66,W
+0BE3:  BTFSC  03.2
+0BE4:  GOTO   3E6
+....................         isEqual = 0; 
+0BE5:  CLRF   64
+....................       } 
+....................    } 
+0BE6:  INCF   65,F
+0BE7:  GOTO   3D2
+....................     
+....................    return isEqual; 
+0BE8:  MOVF   64,W
+0BE9:  MOVWF  78
+.................... } 
+....................  
+.................... void saveSignInEeprom() { 
+*
+0110:  DATA 00,00
+....................   printf(lcd_escreve,"\fBaixando BD"); 
+*
+0522:  MOVLW  F4
+0523:  BSF    03.6
+0524:  MOVWF  0D
+0525:  MOVLW  00
+0526:  MOVWF  0F
+0527:  BCF    03.6
+0528:  CALL   314
+....................   int freeSpace = searchFreePositionEeprom() ; 
+....................   int j; 
+....................   int indexMemoryRAM = 0; 
+*
+0544:  MOVF   78,W
+0545:  MOVWF  68
+0546:  CLRF   6A
+....................  
+....................   if(data_avail) { 
+0547:  BTFSS  3A.0
+0548:  GOTO   571
+....................     for( j= freeSpace ; j<=freeSpace+7 ; j++) { 
+0549:  MOVF   68,W
+054A:  MOVWF  69
+054B:  MOVLW  07
+054C:  ADDWF  68,W
+054D:  SUBWF  69,W
+054E:  BTFSC  03.2
+054F:  GOTO   552
+0550:  BTFSC  03.0
+0551:  GOTO   560
+....................         write_ext_eeprom(j,rx_buffer[indexMemoryRAM]); 
+0552:  MOVLW  2D
+0553:  ADDWF  6A,W
+0554:  MOVWF  04
+0555:  BCF    03.7
+0556:  MOVF   00,W
+0557:  MOVWF  6B
+0558:  MOVF   69,W
+0559:  MOVWF  6C
+055A:  MOVF   6B,W
+055B:  MOVWF  6D
+055C:  CALL   40E
+....................         indexMemoryRAM++; 
+055D:  INCF   6A,F
+....................     } 
+055E:  INCF   69,F
+055F:  GOTO   54B
+....................     data_avail=FALSE; 
+0560:  BCF    3A.0
+....................     printf(lcd_escreve,"\fSalvo! \r"); 
+0561:  MOVLW  FB
+0562:  BSF    03.6
+0563:  MOVWF  0D
+0564:  MOVLW  00
+0565:  MOVWF  0F
+0566:  BCF    03.6
+0567:  CALL   314
+....................     printf(lcd_escreve,"\fDigite ID:\r"); 
+0568:  MOVLW  00
+0569:  BSF    03.6
+056A:  MOVWF  0D
+056B:  MOVLW  01
+056C:  MOVWF  0F
+056D:  BCF    03.6
+056E:  CALL   314
+....................     return; 
+056F:  GOTO   592
+....................   }else { 
+0570:  GOTO   592
+....................     for( j = freeSpace; j<= freeSpace + 7; j++){ 
+0571:  MOVF   68,W
+0572:  MOVWF  69
+0573:  MOVLW  07
+0574:  ADDWF  68,W
+0575:  SUBWF  69,W
+0576:  BTFSC  03.2
+0577:  GOTO   57A
+0578:  BTFSC  03.0
+0579:  GOTO   588
+....................         write_ext_eeprom( j, memoryUserPosition[indexMemoryRAM]);  
+057A:  MOVLW  3E
+057B:  ADDWF  6A,W
+057C:  MOVWF  04
+057D:  BCF    03.7
+057E:  MOVF   00,W
+057F:  MOVWF  6B
+0580:  MOVF   69,W
+0581:  MOVWF  6C
+0582:  MOVF   6B,W
+0583:  MOVWF  6D
+0584:  CALL   40E
+....................         indexMemoryRAM++; 
+0585:  INCF   6A,F
+....................     } 
+0586:  INCF   69,F
+0587:  GOTO   573
+....................     printf(lcd_escreve,"\fCadastro\nefetuado");  
+0588:  MOVLW  07
+0589:  BSF    03.6
+058A:  MOVWF  0D
+058B:  MOVLW  01
+058C:  MOVWF  0F
+058D:  BCF    03.6
+058E:  CALL   314
+....................     delay_ms(100); 
+058F:  MOVLW  64
+0590:  MOVWF  6F
+0591:  CALL   23D
+....................   } 
+.................... } 
+0592:  RETURN
+....................  
+....................  
+.................... unsigned int16 searchFreePositionEeprom() { 
+*
+0529:  CLRF   6B
+052A:  CLRF   6C
+....................   int read = 0; 
+....................   int i = 0; 
+....................   read = read_ext_eeprom(i); 
+052B:  MOVF   6C,W
+052C:  MOVWF  70
+052D:  CALL   45A
+052E:  MOVF   78,W
+052F:  MOVWF  6B
+....................    
+....................   while(read != 0xFF && read != 'x') { 
+0530:  INCFSZ 6B,W
+0531:  GOTO   533
+0532:  GOTO   53F
+0533:  MOVF   6B,W
+0534:  SUBLW  78
+0535:  BTFSC  03.2
+0536:  GOTO   53F
+....................     i+= 8; 
+0537:  MOVLW  08
+0538:  ADDWF  6C,F
+....................     read = read_ext_eeprom(i); 
+0539:  MOVF   6C,W
+053A:  MOVWF  70
+053B:  CALL   45A
+053C:  MOVF   78,W
+053D:  MOVWF  6B
+....................   } 
+053E:  GOTO   530
+....................   return i; 
+053F:  CLRF   7A
+0540:  MOVF   6C,W
+0541:  MOVWF  78
+0542:  MOVF   7A,W
+0543:  MOVWF  79
+....................  
+.................... } 
+....................  
+.................... void deleteUserEeprom() { 
+....................     printf(lcd_escreve,"\fDeletando usuario"); 
+*
+05E8:  MOVLW  11
+05E9:  BSF    03.6
+05EA:  MOVWF  0D
+05EB:  MOVLW  01
+05EC:  MOVWF  0F
+05ED:  BCF    03.6
+05EE:  CALL   314
+....................     delay_ms(100); 
+05EF:  MOVLW  64
+05F0:  MOVWF  6F
+05F1:  CALL   23D
+....................     int isValid = checkByPc(); 
+....................     int k; 
+05F2:  CALL   593
+05F3:  MOVF   78,W
+05F4:  MOVWF  68
+....................         if(isValid) { 
+05F5:  MOVF   68,F
+05F6:  BTFSC  03.2
+05F7:  GOTO   620
+....................             for(k=savePositionForValidID;k<= savePositionForValidID+7;k++){ 
+05F8:  MOVF   49,W
+05F9:  MOVWF  69
+05FA:  MOVLW  07
+05FB:  ADDWF  49,W
+05FC:  SUBWF  69,W
+05FD:  BTFSC  03.2
+05FE:  GOTO   601
+05FF:  BTFSC  03.0
+0600:  GOTO   608
+....................                 write_ext_eeprom(k,0xFF); 
+0601:  MOVF   69,W
+0602:  MOVWF  6C
+0603:  MOVLW  FF
+0604:  MOVWF  6D
+0605:  CALL   40E
+....................             } 
+0606:  INCF   69,F
+0607:  GOTO   5FA
+....................             printf(lcd_escreve,"\f Deletado!"); 
+0608:  MOVLW  1B
+0609:  BSF    03.6
+060A:  MOVWF  0D
+060B:  MOVLW  01
+060C:  MOVWF  0F
+060D:  BCF    03.6
+060E:  CALL   314
+....................             delay_ms(500); 
+060F:  MOVLW  02
+0610:  MOVWF  6A
+0611:  MOVLW  FA
+0612:  MOVWF  6F
+0613:  CALL   23D
+0614:  DECFSZ 6A,F
+0615:  GOTO   611
+....................             del = FALSE; 
+0616:  BCF    3A.2
+....................             printf(lcd_escreve,"\fDigite PIN:\r"); 
+0617:  MOVLW  21
+0618:  BSF    03.6
+0619:  MOVWF  0D
+061A:  MOVLW  01
+061B:  MOVWF  0F
+061C:  BCF    03.6
+061D:  CALL   314
+....................             return; 
+061E:  GOTO   637
+....................         }else { 
+061F:  GOTO   637
+....................             printf(lcd_escreve,"\fUsuario nao\rexiste"); 
+0620:  MOVLW  28
+0621:  BSF    03.6
+0622:  MOVWF  0D
+0623:  MOVLW  01
+0624:  MOVWF  0F
+0625:  BCF    03.6
+0626:  CALL   314
+....................             delay_ms(500); 
+0627:  MOVLW  02
+0628:  MOVWF  6A
+0629:  MOVLW  FA
+062A:  MOVWF  6F
+062B:  CALL   23D
+062C:  DECFSZ 6A,F
+062D:  GOTO   629
+....................             del = FALSE; 
+062E:  BCF    3A.2
+....................             printf(lcd_escreve,"\fDigite PIN:\r"); 
+062F:  MOVLW  32
+0630:  BSF    03.6
+0631:  MOVWF  0D
+0632:  MOVLW  01
+0633:  MOVWF  0F
+0634:  BCF    03.6
+0635:  CALL   314
+....................             return; 
+0636:  GOTO   637
+....................         } 
+....................  
+.................... } 
+....................  
+.................... void deleteUserOnEeprom() { 
+....................      int k; 
+....................      for(k=savePositionForValidID;k<= savePositionForValidID+7;k++){ 
+*
+0CF9:  MOVF   49,W
+0CFA:  MOVWF  65
+0CFB:  MOVLW  07
+0CFC:  ADDWF  49,W
+0CFD:  SUBWF  65,W
+0CFE:  BTFSC  03.2
+0CFF:  GOTO   502
+0D00:  BTFSC  03.0
+0D01:  GOTO   50B
+....................             write_ext_eeprom(k,0xFF); 
+0D02:  MOVF   65,W
+0D03:  MOVWF  6C
+0D04:  MOVLW  FF
+0D05:  MOVWF  6D
+0D06:  BCF    0A.3
+0D07:  CALL   40E
+0D08:  BSF    0A.3
+....................         } 
+0D09:  INCF   65,F
+0D0A:  GOTO   4FB
+....................         printf(lcd_escreve,"\f Deletado!"); 
+0D0B:  MOVLW  39
+0D0C:  BSF    03.6
+0D0D:  MOVWF  0D
+0D0E:  MOVLW  01
+0D0F:  MOVWF  0F
+0D10:  BCF    0A.3
+0D11:  BCF    03.6
+0D12:  CALL   314
+0D13:  BSF    0A.3
+....................         delay_ms(1000); 
+0D14:  MOVLW  04
+0D15:  MOVWF  66
+0D16:  MOVLW  FA
+0D17:  MOVWF  6F
+0D18:  BCF    0A.3
+0D19:  CALL   23D
+0D1A:  BSF    0A.3
+0D1B:  DECFSZ 66,F
+0D1C:  GOTO   516
+.................... } 
+....................  
+.................... void editUserEeprom() { 
+*
+063A:  CALL   593
+063B:  MOVF   78,W
+063C:  MOVWF  68
+....................    int isValid = checkByPc(); 
+....................     
+....................    if(isValid) { 
+063D:  MOVF   68,F
+063E:  BTFSC  03.2
+063F:  GOTO   66D
+....................        printf(lcd_escreve,"\fEditando Usuario"); 
+0640:  MOVLW  3F
+0641:  BSF    03.6
+0642:  MOVWF  0D
+0643:  MOVLW  01
+0644:  MOVWF  0F
+0645:  BCF    03.6
+0646:  CALL   314
+....................        delay_ms(500); 
+0647:  MOVLW  02
+0648:  MOVWF  69
+0649:  MOVLW  FA
+064A:  MOVWF  6F
+064B:  CALL   23D
+064C:  DECFSZ 69,F
+064D:  GOTO   649
+....................        write_ext_eeprom(savePositionForValidID+7,rx_buffer[3]); 
+064E:  MOVLW  07
+064F:  ADDWF  49,W
+0650:  MOVWF  69
+0651:  MOVWF  6C
+0652:  MOVF   30,W
+0653:  MOVWF  6D
+0654:  CALL   40E
+....................        printf(lcd_escreve,"\fFinalizado!"); 
+0655:  MOVLW  48
+0656:  BSF    03.6
+0657:  MOVWF  0D
+0658:  MOVLW  01
+0659:  MOVWF  0F
+065A:  BCF    03.6
+065B:  CALL   314
+....................        delay_ms(500); 
+065C:  MOVLW  02
+065D:  MOVWF  69
+065E:  MOVLW  FA
+065F:  MOVWF  6F
+0660:  CALL   23D
+0661:  DECFSZ 69,F
+0662:  GOTO   65E
+....................        edit = FALSE; 
+0663:  BCF    3A.4
+....................        printf(lcd_escreve,"\fDigite ID: \r"); 
+0664:  MOVLW  4F
+0665:  BSF    03.6
+0666:  MOVWF  0D
+0667:  MOVLW  01
+0668:  MOVWF  0F
+0669:  BCF    03.6
+066A:  CALL   314
+....................        
+....................        return; 
+066B:  GOTO   684
+....................    }else { 
+066C:  GOTO   684
+....................       printf(lcd_escreve,"\fID nao existe."); 
+066D:  MOVLW  56
+066E:  BSF    03.6
+066F:  MOVWF  0D
+0670:  MOVLW  01
+0671:  MOVWF  0F
+0672:  BCF    03.6
+0673:  CALL   314
+....................       delay_ms(1000); 
+0674:  MOVLW  04
+0675:  MOVWF  69
+0676:  MOVLW  FA
+0677:  MOVWF  6F
+0678:  CALL   23D
+0679:  DECFSZ 69,F
+067A:  GOTO   676
+....................       edit = FALSE; 
+067B:  BCF    3A.4
+....................       printf(lcd_escreve,"\fDigite ID: \r"); 
+067C:  MOVLW  5E
+067D:  BSF    03.6
+067E:  MOVWF  0D
+067F:  MOVLW  01
+0680:  MOVWF  0F
+0681:  BCF    03.6
+0682:  CALL   314
+....................  
+....................       return; 
+0683:  GOTO   684
+....................    } 
+....................  
+.................... } 
+....................  
+.................... int checkDoubleIDEeprom() { 
+*
+083F:  MOVLW  01
+0840:  MOVWF  65
+0841:  CLRF   66
+0842:  MOVWF  67
+....................     int hasIDEqual = 1; 
+....................     int exit = 0; 
+....................     int indexEeprom=1;  
+....................     while(!exit){ 
+0843:  MOVF   66,F
+0844:  BTFSS  03.2
+0845:  GOTO   089
+....................       for(i=0;i<=2;i++){ 
+0846:  CLRF   3D
+0847:  CLRF   3C
+0848:  MOVF   3D,F
+0849:  BTFSS  03.2
+084A:  GOTO   072
+084B:  MOVF   3C,W
+084C:  SUBLW  02
+084D:  BTFSS  03.0
+084E:  GOTO   072
+....................            if(read_ext_eeprom(i+indexEeprom*8 ) != memoryUserPosition[i]) { 
+084F:  RLF    67,W
+0850:  MOVWF  77
+0851:  RLF    77,F
+0852:  RLF    77,F
+0853:  MOVLW  F8
+0854:  ANDWF  77,F
+0855:  MOVF   77,W
+0856:  ADDWF  3C,W
+0857:  MOVWF  68
+0858:  MOVF   3D,W
+0859:  MOVWF  69
+085A:  BTFSC  03.0
+085B:  INCF   69,F
+085C:  MOVF   68,W
+085D:  MOVWF  70
+085E:  BCF    0A.3
+085F:  CALL   45A
+0860:  BSF    0A.3
+0861:  MOVF   78,W
+0862:  MOVWF  68
+0863:  MOVLW  3E
+0864:  ADDWF  3C,W
+0865:  MOVWF  04
+0866:  BCF    03.7
+0867:  BTFSC  3D.0
+0868:  BSF    03.7
+0869:  MOVF   00,W
+086A:  SUBWF  68,W
+086B:  BTFSC  03.2
+086C:  GOTO   06E
+....................               hasIDEqual = 0; 
+086D:  CLRF   65
+....................            } 
+....................       } 
+086E:  INCF   3C,F
+086F:  BTFSC  03.2
+0870:  INCF   3D,F
+0871:  GOTO   048
+....................       if(hasIDEqual) { 
+0872:  MOVF   65,F
+0873:  BTFSC  03.2
+0874:  GOTO   07E
+....................          exit=1 ; 
+0875:  MOVLW  01
+0876:  MOVWF  66
+....................          savePositionForValidID = indexEeprom *8; 
+0877:  RLF    67,W
+0878:  MOVWF  49
+0879:  RLF    49,F
+087A:  RLF    49,F
+087B:  MOVLW  F8
+087C:  ANDWF  49,F
+....................       }else { 
+087D:  GOTO   081
+....................          hasIDEqual=1; 
+087E:  MOVLW  01
+087F:  MOVWF  65
+....................          indexEeprom++; 
+0880:  INCF   67,F
+....................       } 
+....................         
+....................       if( indexEeprom == 65) { 
+0881:  MOVF   67,W
+0882:  SUBLW  41
+0883:  BTFSS  03.2
+0884:  GOTO   088
+....................        exit =1; 
+0885:  MOVLW  01
+0886:  MOVWF  66
+....................        hasIDEqual = 0 ; 
+0887:  CLRF   65
+....................       } 
+....................    } 
+0888:  GOTO   043
+....................    return hasIDEqual; 
+0889:  MOVF   65,W
+088A:  MOVWF  78
+....................  
+.................... } 
+....................  
+.................... int checkExistIDOnEeprom()  { 
+*
+0953:  MOVLW  01
+0954:  MOVWF  65
+0955:  MOVWF  66
+0956:  CLRF   67
+....................    int isEqual = 1; 
+....................    int indexEeprom = 1; 
+....................    int exit =0; 
+....................    while(!exit){ 
+0957:  MOVF   67,F
+0958:  BTFSS  03.2
+0959:  GOTO   19D
+....................       for(i=0;i<=2;i++){ 
+095A:  CLRF   3D
+095B:  CLRF   3C
+095C:  MOVF   3D,F
+095D:  BTFSS  03.2
+095E:  GOTO   186
+095F:  MOVF   3C,W
+0960:  SUBLW  02
+0961:  BTFSS  03.0
+0962:  GOTO   186
+....................            if(read_ext_eeprom(i+indexEeprom*8 ) != memoryUserPosition[i]) { 
+0963:  RLF    66,W
+0964:  MOVWF  77
+0965:  RLF    77,F
+0966:  RLF    77,F
+0967:  MOVLW  F8
+0968:  ANDWF  77,F
+0969:  MOVF   77,W
+096A:  ADDWF  3C,W
+096B:  MOVWF  68
+096C:  MOVF   3D,W
+096D:  MOVWF  69
+096E:  BTFSC  03.0
+096F:  INCF   69,F
+0970:  MOVF   68,W
+0971:  MOVWF  70
+0972:  BCF    0A.3
+0973:  CALL   45A
+0974:  BSF    0A.3
+0975:  MOVF   78,W
+0976:  MOVWF  68
+0977:  MOVLW  3E
+0978:  ADDWF  3C,W
+0979:  MOVWF  04
+097A:  BCF    03.7
+097B:  BTFSC  3D.0
+097C:  BSF    03.7
+097D:  MOVF   00,W
+097E:  SUBWF  68,W
+097F:  BTFSC  03.2
+0980:  GOTO   182
+....................               isEqual = 0; 
+0981:  CLRF   65
+....................            } 
+....................       } 
+0982:  INCF   3C,F
+0983:  BTFSC  03.2
+0984:  INCF   3D,F
+0985:  GOTO   15C
+....................       if(isEqual) { 
+0986:  MOVF   65,F
+0987:  BTFSC  03.2
+0988:  GOTO   192
+....................          exit=1 ; 
+0989:  MOVLW  01
+098A:  MOVWF  67
+....................          savePositionForValidID = indexEeprom *8; 
+098B:  RLF    66,W
+098C:  MOVWF  49
+098D:  RLF    49,F
+098E:  RLF    49,F
+098F:  MOVLW  F8
+0990:  ANDWF  49,F
+....................       }else { 
+0991:  GOTO   195
+....................          isEqual=1; 
+0992:  MOVLW  01
+0993:  MOVWF  65
+....................          indexEeprom++; 
+0994:  INCF   66,F
+....................       } 
+....................         
+....................       if( indexEeprom == 65) { 
+0995:  MOVF   66,W
+0996:  SUBLW  41
+0997:  BTFSS  03.2
+0998:  GOTO   19C
+....................        exit =1; 
+0999:  MOVLW  01
+099A:  MOVWF  67
+....................        isEqual = 0 ; 
+099B:  CLRF   65
+....................       } 
+....................    } 
+099C:  GOTO   157
+....................     
+....................    return isEqual ; 
+099D:  MOVF   65,W
+099E:  MOVWF  78
+.................... } 
+099F:  RETURN
+....................  
+.................... int checkByPc(){ 
+*
+0593:  MOVLW  01
+0594:  MOVWF  6A
+0595:  MOVWF  6B
+0596:  CLRF   6C
+....................    int isEqual = 1; 
+....................    int indexEeprom = 1; 
+....................    int exit =0; 
+....................    int g; 
+....................    while(!exit){ 
+0597:  MOVF   6C,F
+0598:  BTFSS  03.2
+0599:  GOTO   5DB
+....................       for(i=0;i<=2;i++){ 
+059A:  CLRF   3D
+059B:  CLRF   3C
+059C:  MOVF   3D,F
+059D:  BTFSS  03.2
+059E:  GOTO   5C4
+059F:  MOVF   3C,W
+05A0:  SUBLW  02
+05A1:  BTFSS  03.0
+05A2:  GOTO   5C4
+....................            if(read_ext_eeprom(i+(indexEeprom*8) ) != rx_buffer[i]) { 
+05A3:  RLF    6B,W
+05A4:  MOVWF  77
+05A5:  RLF    77,F
+05A6:  RLF    77,F
+05A7:  MOVLW  F8
+05A8:  ANDWF  77,F
+05A9:  MOVF   77,W
+05AA:  ADDWF  3C,W
+05AB:  MOVWF  6E
+05AC:  MOVF   3D,W
+05AD:  MOVWF  6F
+05AE:  BTFSC  03.0
+05AF:  INCF   6F,F
+05B0:  MOVF   6E,W
+05B1:  MOVWF  70
+05B2:  CALL   45A
+05B3:  MOVF   78,W
+05B4:  MOVWF  6E
+05B5:  MOVLW  2D
+05B6:  ADDWF  3C,W
+05B7:  MOVWF  04
+05B8:  BCF    03.7
+05B9:  BTFSC  3D.0
+05BA:  BSF    03.7
+05BB:  MOVF   00,W
+05BC:  SUBWF  6E,W
+05BD:  BTFSC  03.2
+05BE:  GOTO   5C0
+....................               isEqual = 0; 
+05BF:  CLRF   6A
+....................            } 
+....................       } 
+05C0:  INCF   3C,F
+05C1:  BTFSC  03.2
+05C2:  INCF   3D,F
+05C3:  GOTO   59C
+....................       if(isEqual) { 
+05C4:  MOVF   6A,F
+05C5:  BTFSC  03.2
+05C6:  GOTO   5D0
+....................          exit=1 ; 
+05C7:  MOVLW  01
+05C8:  MOVWF  6C
+....................          savePositionForValidID = indexEeprom *8; 
+05C9:  RLF    6B,W
+05CA:  MOVWF  49
+05CB:  RLF    49,F
+05CC:  RLF    49,F
+05CD:  MOVLW  F8
+05CE:  ANDWF  49,F
+....................       }else { 
+05CF:  GOTO   5D3
+....................          isEqual=1; 
+05D0:  MOVLW  01
+05D1:  MOVWF  6A
+....................          indexEeprom++; 
+05D2:  INCF   6B,F
+....................       } 
+....................         
+....................       if( indexEeprom == 65) { 
+05D3:  MOVF   6B,W
+05D4:  SUBLW  41
+05D5:  BTFSS  03.2
+05D6:  GOTO   5DA
+....................        exit =1; 
+05D7:  MOVLW  01
+05D8:  MOVWF  6C
+....................        isEqual = 0 ; 
+05D9:  CLRF   6A
+....................       } 
+....................    } 
+05DA:  GOTO   597
+....................     
+....................    return isEqual ; 
+05DB:  MOVF   6A,W
+05DC:  MOVWF  78
+.................... } 
+05DD:  RETURN
+....................  
+.................... #include "ultilidades.c" 
+....................  
+....................  
+.................... char saveCharPressByUser () { 
+05DE:  MOVLW  FF
+05DF:  MOVWF  67
+....................   char actualChar = 255; 
+....................    
+....................   while(actualChar == 255) { 
+05E0:  INCFSZ 67,W
+05E1:  GOTO   7DF
+....................         if(data_avail) { 
+05E2:  BTFSS  3A.0
+05E3:  GOTO   5E6
+....................             saveSignInEeprom(); 
+05E4:  CALL   522
+....................         } else if(del){ 
+05E5:  GOTO   6B5
+05E6:  BTFSS  3A.2
+05E7:  GOTO   638
+....................             deleteUserEeprom(); 
+....................         }else if(edit){ 
+*
+0637:  GOTO   6B5
+0638:  BTFSS  3A.4
+0639:  GOTO   685
+....................             editUserEeprom(); 
+....................         }else if (data_users) { 
+*
+0684:  GOTO   6B5
+0685:  BTFSS  3A.7
+0686:  GOTO   6B5
+....................             saveDataBaseOnEeprom(); 
+....................         } 
+....................          
+....................         actualChar = tc_tecla(500); 
+*
+06B5:  MOVLW  F4
+06B6:  MOVWF  68
+*
+07DC:  MOVF   78,W
+07DD:  MOVWF  67
+....................     } 
+07DE:  GOTO   5E0
+....................   return actualChar; 
+07DF:  MOVF   67,W
+07E0:  MOVWF  78
+.................... } 
+07E1:  RETURN
+....................  
+....................  
+.................... void handeInputsIDByUser() { 
+....................   inicio: 
+....................   printf(lcd_escreve,"\fDigite ID: \r"); 
+*
+0800:  MOVLW  65
+0801:  BSF    03.6
+0802:  MOVWF  0D
+0803:  MOVLW  01
+0804:  MOVWF  0F
+0805:  BCF    0A.3
+0806:  BCF    03.6
+0807:  CALL   314
+0808:  BSF    0A.3
+....................  
+....................   indexArrayDigitUser = 0; 
+0809:  CLRF   3B
+....................   int exit = 0; 
+080A:  CLRF   64
+....................   
+....................   while(!exit) { 
+080B:  MOVF   64,F
+080C:  BTFSS  03.2
+080D:  GOTO   0C1
+....................     tecla = saveCharPressByUser(); 
+080E:  BCF    0A.3
+080F:  CALL   5DE
+0810:  BSF    0A.3
+0811:  MOVF   78,W
+0812:  MOVWF  47
+....................     switch (tecla) { 
+0813:  MOVF   47,W
+0814:  XORLW  41
+0815:  BTFSC  03.2
+0816:  GOTO   01E
+0817:  XORLW  02
+0818:  BTFSC  03.2
+0819:  GOTO   0A7
+081A:  XORLW  69
+081B:  BTFSC  03.2
+081C:  GOTO   0AC
+081D:  GOTO   0AF
+....................       case 'A': { 
+....................           if(indexArrayDigitUser<=0 ) { 
+081E:  MOVF   3B,F
+081F:  BTFSS  03.2
+0820:  GOTO   03D
+....................             printf(lcd_escreve,"\fCampo em Branco."); 
+0821:  MOVLW  6C
+0822:  BSF    03.6
+0823:  MOVWF  0D
+0824:  MOVLW  01
+0825:  MOVWF  0F
+0826:  BCF    0A.3
+0827:  BCF    03.6
+0828:  CALL   314
+0829:  BSF    0A.3
+....................             delay_ms(1000); 
+082A:  MOVLW  04
+082B:  MOVWF  65
+082C:  MOVLW  FA
+082D:  MOVWF  6F
+082E:  BCF    0A.3
+082F:  CALL   23D
+0830:  BSF    0A.3
+0831:  DECFSZ 65,F
+0832:  GOTO   02C
+....................             printf(lcd_escreve,"\fDigite ID: \r"); 
+0833:  MOVLW  75
+0834:  BSF    03.6
+0835:  MOVWF  0D
+0836:  MOVLW  01
+0837:  MOVWF  0F
+0838:  BCF    0A.3
+0839:  BCF    03.6
+083A:  CALL   314
+083B:  BSF    0A.3
+....................           }else { 
+083C:  GOTO   0A7
+....................              if(cadastro == 1) { 
+083D:  DECFSZ 4C,W
+083E:  GOTO   0A4
+....................                 if(checkDoubleIDEeprom() == 1) { 
+*
+088B:  DECFSZ 78,W
+088C:  GOTO   0A1
+....................                   printf(lcd_escreve,"\fID ja existe"); 
+088D:  MOVLW  7C
+088E:  BSF    03.6
+088F:  MOVWF  0D
+0890:  MOVLW  01
+0891:  MOVWF  0F
+0892:  BCF    0A.3
+0893:  BCF    03.6
+0894:  CALL   314
+0895:  BSF    0A.3
+....................                   delay_ms(1000); 
+0896:  MOVLW  04
+0897:  MOVWF  65
+0898:  MOVLW  FA
+0899:  MOVWF  6F
+089A:  BCF    0A.3
+089B:  CALL   23D
+089C:  BSF    0A.3
+089D:  DECFSZ 65,F
+089E:  GOTO   098
+....................                   goto inicio; 
+089F:  GOTO   000
+....................                }else { 
+08A0:  GOTO   0A3
+....................                   exit = 1; 
+08A1:  MOVLW  01
+08A2:  MOVWF  64
+....................                } 
+....................              }else { 
+08A3:  GOTO   0A6
+....................                exit = 1; 
+08A4:  MOVLW  01
+08A5:  MOVWF  64
+....................              } 
+....................              
+....................             break; 
+08A6:  GOTO   0C0
+....................          } 
+....................       } 
+....................       case 'C':  { 
+....................         indexArrayDigitUser = 0 ; 
+08A7:  CLRF   3B
+....................         deleteIDonRAM(); 
+08A8:  BCF    0A.3
+08A9:  CALL   7E2
+08AA:  BSF    0A.3
+....................         break; 
+08AB:  GOTO   0C0
+....................       } 
+....................       case '*': { 
+....................          exit=1; 
+08AC:  MOVLW  01
+08AD:  MOVWF  64
+....................          screen=1; // 1 = menu  
+08AE:  MOVWF  48
+....................       } 
+....................       default: { 
+....................         if(indexArrayDigitUser<=2) { 
+08AF:  MOVF   3B,W
+08B0:  SUBLW  02
+08B1:  BTFSS  03.0
+08B2:  GOTO   0BF
+....................           printf(lcd_escreve,"%c",tecla); 
+08B3:  MOVF   47,W
+08B4:  MOVWF  6E
+08B5:  BCF    0A.3
+08B6:  CALL   2DC
+08B7:  BSF    0A.3
+....................           memoryUserPosition[indexArrayDigitUser] = tecla; 
+08B8:  MOVLW  3E
+08B9:  ADDWF  3B,W
+08BA:  MOVWF  04
+08BB:  BCF    03.7
+08BC:  MOVF   47,W
+08BD:  MOVWF  00
+....................           indexArrayDigitUser++; 
+08BE:  INCF   3B,F
+....................         } 
+....................         break; 
+08BF:  GOTO   0C0
+....................       } 
+....................     } 
+....................   } 
+08C0:  GOTO   00B
+.................... } 
+08C1:  RETURN
+....................  
+.................... void  handleSavePinOnRam() { 
+....................    indexArrayDigitUser = 3; 
+08C2:  MOVLW  03
+08C3:  MOVWF  3B
+....................    int exit = 0 ; 
+08C4:  CLRF   64
+....................    printf(lcd_escreve,"\fPIN:\r"); 
+08C5:  MOVLW  83
+08C6:  BSF    03.6
+08C7:  MOVWF  0D
+08C8:  MOVLW  01
+08C9:  MOVWF  0F
+08CA:  BCF    0A.3
+08CB:  BCF    03.6
+08CC:  CALL   314
+08CD:  BSF    0A.3
+....................    while(!exit) { 
+08CE:  MOVF   64,F
+08CF:  BTFSS  03.2
+08D0:  GOTO   12D
+....................       tecla = saveCharPressByUser (); 
+08D1:  BCF    0A.3
+08D2:  CALL   5DE
+08D3:  BSF    0A.3
+08D4:  MOVF   78,W
+08D5:  MOVWF  47
+....................       switch(tecla) { 
+08D6:  MOVF   47,W
+08D7:  XORLW  41
+08D8:  BTFSC  03.2
+08D9:  GOTO   0DE
+08DA:  XORLW  02
+08DB:  BTFSC  03.2
+08DC:  GOTO   101
+08DD:  GOTO   11B
+....................          case 'A': { 
+....................             if(indexArrayDigitUser<=3) { 
+08DE:  MOVF   3B,W
+08DF:  SUBLW  03
+08E0:  BTFSS  03.0
+08E1:  GOTO   0FE
+....................                 printf(lcd_escreve,"\f Senha obrigatoria"); 
+08E2:  MOVLW  87
+08E3:  BSF    03.6
+08E4:  MOVWF  0D
+08E5:  MOVLW  01
+08E6:  MOVWF  0F
+08E7:  BCF    0A.3
+08E8:  BCF    03.6
+08E9:  CALL   314
+08EA:  BSF    0A.3
+....................                 delay_ms(1000); 
+08EB:  MOVLW  04
+08EC:  MOVWF  65
+08ED:  MOVLW  FA
+08EE:  MOVWF  6F
+08EF:  BCF    0A.3
+08F0:  CALL   23D
+08F1:  BSF    0A.3
+08F2:  DECFSZ 65,F
+08F3:  GOTO   0ED
+....................                 printf(lcd_escreve,"\fPIN:\r"); 
+08F4:  MOVLW  91
+08F5:  BSF    03.6
+08F6:  MOVWF  0D
+08F7:  MOVLW  01
+08F8:  MOVWF  0F
+08F9:  BCF    0A.3
+08FA:  BCF    03.6
+08FB:  CALL   314
+08FC:  BSF    0A.3
+....................  
+....................             }else { 
+08FD:  GOTO   100
+....................                exit = 1; 
+08FE:  MOVLW  01
+08FF:  MOVWF  64
+....................             } 
+....................             break; 
+0900:  GOTO   12C
+....................          } 
+....................          case 'C':  { 
+....................            indexArrayDigitUser = 3 ; 
+0901:  MOVLW  03
+0902:  MOVWF  3B
+....................            deletePINonRAM(); 
+....................            break; 
+*
+091A:  GOTO   12C
+....................          } 
+....................          default: { 
+....................            if(indexArrayDigitUser<=6) { 
+091B:  MOVF   3B,W
+091C:  SUBLW  06
+091D:  BTFSS  03.0
+091E:  GOTO   12B
+....................              printf(lcd_escreve,"%c",tecla); 
+091F:  MOVF   47,W
+0920:  MOVWF  6E
+0921:  BCF    0A.3
+0922:  CALL   2DC
+0923:  BSF    0A.3
+....................              memoryUserPosition[indexArrayDigitUser] = tecla; 
+0924:  MOVLW  3E
+0925:  ADDWF  3B,W
+0926:  MOVWF  04
+0927:  BCF    03.7
+0928:  MOVF   47,W
+0929:  MOVWF  00
+....................              indexArrayDigitUser++; 
+092A:  INCF   3B,F
+....................            } 
+....................            break; 
+092B:  GOTO   12C
+....................          } 
+....................       } 
+....................    } 
+092C:  GOTO   0CE
+.................... } 
+092D:  RETURN
+....................  
+....................  
+.................... int checkId(){ 
+*
+0A9A:  MOVLW  01
+0A9B:  MOVWF  60
+0A9C:  MOVWF  61
+0A9D:  CLRF   62
+....................    int isEqual = 1; 
+....................    int indexEeprom = 1; 
+....................    int exit =0; 
+....................    int g; 
+....................    while(!exit){ 
+0A9E:  MOVF   62,F
+0A9F:  BTFSS  03.2
+0AA0:  GOTO   2E4
+....................       for(i=0;i<=2;i++){ 
+0AA1:  CLRF   3D
+0AA2:  CLRF   3C
+0AA3:  MOVF   3D,F
+0AA4:  BTFSS  03.2
+0AA5:  GOTO   2CD
+0AA6:  MOVF   3C,W
+0AA7:  SUBLW  02
+0AA8:  BTFSS  03.0
+0AA9:  GOTO   2CD
+....................            if(read_ext_eeprom(i+indexEeprom*8 ) != memoryUserPosition[i]) { 
+0AAA:  RLF    61,W
+0AAB:  MOVWF  77
+0AAC:  RLF    77,F
+0AAD:  RLF    77,F
+0AAE:  MOVLW  F8
+0AAF:  ANDWF  77,F
+0AB0:  MOVF   77,W
+0AB1:  ADDWF  3C,W
+0AB2:  MOVWF  64
+0AB3:  MOVF   3D,W
+0AB4:  MOVWF  65
+0AB5:  BTFSC  03.0
+0AB6:  INCF   65,F
+0AB7:  MOVF   64,W
+0AB8:  MOVWF  70
+0AB9:  BCF    0A.3
+0ABA:  CALL   45A
+0ABB:  BSF    0A.3
+0ABC:  MOVF   78,W
+0ABD:  MOVWF  64
+0ABE:  MOVLW  3E
+0ABF:  ADDWF  3C,W
+0AC0:  MOVWF  04
+0AC1:  BCF    03.7
+0AC2:  BTFSC  3D.0
+0AC3:  BSF    03.7
+0AC4:  MOVF   00,W
+0AC5:  SUBWF  64,W
+0AC6:  BTFSC  03.2
+0AC7:  GOTO   2C9
+....................               isEqual = 0; 
+0AC8:  CLRF   60
+....................            } 
+....................       } 
+0AC9:  INCF   3C,F
+0ACA:  BTFSC  03.2
+0ACB:  INCF   3D,F
+0ACC:  GOTO   2A3
+....................       if(isEqual) { 
+0ACD:  MOVF   60,F
+0ACE:  BTFSC  03.2
+0ACF:  GOTO   2D9
+....................          exit=1 ; 
+0AD0:  MOVLW  01
+0AD1:  MOVWF  62
+....................          savePositionForValidID = indexEeprom *8; 
+0AD2:  RLF    61,W
+0AD3:  MOVWF  49
+0AD4:  RLF    49,F
+0AD5:  RLF    49,F
+0AD6:  MOVLW  F8
+0AD7:  ANDWF  49,F
+....................       }else { 
+0AD8:  GOTO   2DC
+....................          isEqual=1; 
+0AD9:  MOVLW  01
+0ADA:  MOVWF  60
+....................          indexEeprom++; 
+0ADB:  INCF   61,F
+....................       } 
+....................         
+....................       if( indexEeprom == 65) { 
+0ADC:  MOVF   61,W
+0ADD:  SUBLW  41
+0ADE:  BTFSS  03.2
+0ADF:  GOTO   2E3
+....................        exit =1; 
+0AE0:  MOVLW  01
+0AE1:  MOVWF  62
+....................        isEqual = 0 ; 
+0AE2:  CLRF   60
+....................       } 
+....................    } 
+0AE3:  GOTO   29E
+....................     
+....................    return isEqual ; 
+0AE4:  MOVF   60,W
+0AE5:  MOVWF  78
+.................... } 
+....................  
+.................... int checkPIN() { 
+*
+0AFD:  MOVLW  03
+0AFE:  MOVWF  60
+0AFF:  MOVLW  01
+0B00:  MOVWF  61
+0B01:  MOVLW  03
+0B02:  ADDWF  49,W
+0B03:  MOVWF  63
+....................    int indexMemoryRAM=3; 
+....................    int isEqual = 1; 
+....................    int j; 
+....................    int indexEeprom = savePositionForValidID + 3; 
+....................    for(j=indexEeprom;j<=indexEeprom + 3 ; j++){ 
+0B04:  MOVF   63,W
+0B05:  MOVWF  62
+0B06:  MOVLW  03
+0B07:  ADDWF  63,W
+0B08:  SUBWF  62,W
+0B09:  BTFSC  03.2
+0B0A:  GOTO   30D
+0B0B:  BTFSC  03.0
+0B0C:  GOTO   320
+....................       if(read_ext_eeprom(j) != memoryUserPosition[indexMemoryRAM]) { 
+0B0D:  MOVF   62,W
+0B0E:  MOVWF  70
+0B0F:  BCF    0A.3
+0B10:  CALL   45A
+0B11:  BSF    0A.3
+0B12:  MOVF   78,W
+0B13:  MOVWF  64
+0B14:  MOVLW  3E
+0B15:  ADDWF  60,W
+0B16:  MOVWF  04
+0B17:  BCF    03.7
+0B18:  MOVF   00,W
+0B19:  SUBWF  64,W
+0B1A:  BTFSC  03.2
+0B1B:  GOTO   31D
+....................          isEqual = 0; 
+0B1C:  CLRF   61
+....................       } 
+....................       indexMemoryRAM++; 
+0B1D:  INCF   60,F
+....................    } 
+0B1E:  INCF   62,F
+0B1F:  GOTO   306
+....................    if(isEqual == 1) { 
+0B20:  DECFSZ 61,W
+0B21:  GOTO   331
+....................       if(read_ext_eeprom(indexEeprom+4)== '1') { 
+0B22:  MOVLW  04
+0B23:  ADDWF  63,W
+0B24:  MOVWF  64
+0B25:  MOVWF  70
+0B26:  BCF    0A.3
+0B27:  CALL   45A
+0B28:  BSF    0A.3
+0B29:  MOVF   78,W
+0B2A:  SUBLW  31
+0B2B:  BTFSS  03.2
+0B2C:  GOTO   330
+....................          isUserOk = 1; 
+0B2D:  MOVLW  01
+0B2E:  MOVWF  4A
+....................       }else { 
+0B2F:  GOTO   331
+....................          isUserOk = 0; 
+0B30:  CLRF   4A
+....................       } 
+....................      
+....................        
+....................    } 
+....................    return isEqual; 
+0B31:  MOVF   61,W
+0B32:  MOVWF  78
+.................... } 
+....................  
+.................... void clearRAM() { 
+....................    int j; 
+....................    for(j=0;j<=7;j++){ 
+*
+035A:  CLRF   64
+035B:  MOVF   64,W
+035C:  SUBLW  07
+035D:  BTFSS  03.0
+035E:  GOTO   367
+....................       memoryUserPosition[j] = 0xFF; 
+035F:  MOVLW  3E
+0360:  ADDWF  64,W
+0361:  MOVWF  04
+0362:  BCF    03.7
+0363:  MOVLW  FF
+0364:  MOVWF  00
+....................    } 
+0365:  INCF   64,F
+0366:  GOTO   35B
+.................... } 
+0367:  RETURN
+....................  
+.................... void deleteIDonRAM() { 
+*
+019B:  DATA 00,00
+....................    int i; 
+....................    for(i=0;i<=2;i++) { 
+*
+07E2:  CLRF   65
+07E3:  MOVF   65,W
+07E4:  SUBLW  02
+07E5:  BTFSS  03.0
+07E6:  GOTO   7EF
+....................      memoryUserPosition[i] = 0xFF;  
+07E7:  MOVLW  3E
+07E8:  ADDWF  65,W
+07E9:  MOVWF  04
+07EA:  BCF    03.7
+07EB:  MOVLW  FF
+07EC:  MOVWF  00
+....................    } 
+07ED:  INCF   65,F
+07EE:  GOTO   7E3
+....................    printf(lcd_escreve,"\fDigite ID:\r"); 
+07EF:  MOVLW  95
+07F0:  BSF    03.6
+07F1:  MOVWF  0D
+07F2:  MOVLW  01
+07F3:  MOVWF  0F
+07F4:  BCF    03.6
+07F5:  CALL   314
+.................... } 
+07F6:  RETURN
+....................  
+.................... void deletePINonRAM() { 
+....................    int i; 
+....................    for(i=3;i<=6;i++) { 
+*
+0903:  MOVLW  03
+0904:  MOVWF  65
+0905:  MOVF   65,W
+0906:  SUBLW  06
+0907:  BTFSS  03.0
+0908:  GOTO   111
+....................      memoryUserPosition[i] = 0xFF;  
+0909:  MOVLW  3E
+090A:  ADDWF  65,W
+090B:  MOVWF  04
+090C:  BCF    03.7
+090D:  MOVLW  FF
+090E:  MOVWF  00
+....................    } 
+090F:  INCF   65,F
+0910:  GOTO   105
+....................    printf(lcd_escreve,"\fDigite PIN:\r"); 
+0911:  MOVLW  9C
+0912:  BSF    03.6
+0913:  MOVWF  0D
+0914:  MOVLW  01
+0915:  MOVWF  0F
+0916:  BCF    0A.3
+0917:  BCF    03.6
+0918:  CALL   314
+0919:  BSF    0A.3
+....................  
+.................... } 
+....................  
+.................... //============================ VOID [MAIN]================================ 
+....................  
+.................... void main () { 
+*
+01B2:  DATA 00,00
+*
+09A0:  CLRF   04
+09A1:  BCF    03.7
+09A2:  MOVLW  1F
+09A3:  ANDWF  03,F
+09A4:  MOVLW  81
+09A5:  BSF    03.5
+09A6:  MOVWF  19
+09A7:  MOVLW  A6
+09A8:  MOVWF  18
+09A9:  MOVLW  90
+09AA:  BCF    03.5
+09AB:  MOVWF  18
+09AC:  CLRF   28
+09AD:  CLRF   29
+09AE:  BCF    3A.0
+09AF:  BCF    3A.1
+09B0:  BCF    3A.2
+09B1:  BCF    3A.3
+09B2:  BCF    3A.5
+09B3:  BCF    3A.6
+09B4:  BCF    3A.7
+09B5:  CLRF   3D
+09B6:  CLRF   3C
+09B7:  CLRF   48
+09B8:  MOVLW  01
+09B9:  MOVWF  49
+09BA:  CLRF   4C
+09BB:  MOVWF  4D
+09BC:  BCF    4F.0
+09BD:  BSF    03.5
+09BE:  BSF    1F.0
+09BF:  BSF    1F.1
+09C0:  BSF    1F.2
+09C1:  BCF    1F.3
+09C2:  MOVLW  07
+09C3:  MOVWF  1C
+*
+09C7:  CLRF   5C
+09C8:  CLRF   5D
+09C9:  MOVLW  CE
+09CA:  MOVWF  5E
+....................   BYTE value,value_recebido, cmd; 
+....................   EEPROM_ADDRESS address; 
+....................    
+....................   unsigned int i=0,tensao=0; signed int y=-50;  
+....................   setup_adc(ADC_CLOCK_DIV_16);  
+09CB:  BSF    03.5
+09CC:  BSF    1F.6
+09CD:  BCF    03.5
+09CE:  BSF    1F.6
+09CF:  BCF    1F.7
+09D0:  BSF    03.5
+09D1:  BCF    1F.7
+09D2:  BCF    03.5
+09D3:  BSF    1F.0
+....................   setup_adc_ports(AN0); 
+09D4:  BSF    03.5
+09D5:  BCF    1F.0
+09D6:  BSF    1F.1
+09D7:  BSF    1F.2
+09D8:  BSF    1F.3
+....................   setup_psp(PSP_DISABLED);  
+09D9:  BCF    09.4
+....................   setup_spi(SPI_SS_DISABLED);  
+09DA:  BCF    03.5
+09DB:  BCF    14.5
+09DC:  BCF    27.5
+09DD:  MOVF   27,W
+09DE:  BSF    03.5
+09DF:  MOVWF  07
+09E0:  BCF    03.5
+09E1:  BSF    27.4
+09E2:  MOVF   27,W
+09E3:  BSF    03.5
+09E4:  MOVWF  07
+09E5:  BCF    03.5
+09E6:  BCF    27.3
+09E7:  MOVF   27,W
+09E8:  BSF    03.5
+09E9:  MOVWF  07
+09EA:  MOVLW  01
+09EB:  BCF    03.5
+09EC:  MOVWF  14
+09ED:  MOVLW  00
+09EE:  BSF    03.5
+09EF:  MOVWF  14
+....................   setup_timer_0(RTCC_INTERNAL|RTCC_DIV_1); 
+09F0:  MOVF   01,W
+09F1:  ANDLW  C7
+09F2:  IORLW  08
+09F3:  MOVWF  01
+....................   setup_timer_1(T1_DISABLED);  
+09F4:  BCF    03.5
+09F5:  CLRF   10
+....................   setup_timer_2(T2_DISABLED,0,1);  
+09F6:  MOVLW  00
+09F7:  MOVWF  78
+09F8:  MOVWF  12
+09F9:  MOVLW  00
+09FA:  BSF    03.5
+09FB:  MOVWF  12
+....................   setup_comparator(NC_NC_NC_NC); 
+09FC:  MOVLW  07
+09FD:  MOVWF  1C
+09FE:  MOVF   05,W
+09FF:  MOVWF  05
+0A00:  MOVLW  10
+0A01:  MOVWF  77
+0A02:  DECFSZ 77,F
+0A03:  GOTO   202
+0A04:  NOP
+0A05:  MOVF   1C,W
+0A06:  BCF    03.5
+0A07:  BCF    0D.6
+....................   setup_vref(FALSE); 
+0A08:  BSF    03.5
+0A09:  CLRF   1D
+....................   enable_interrupts(INT_RDA);  
+0A0A:  BSF    0C.5
+....................   enable_interrupts(GLOBAL); 
+0A0B:  MOVLW  C0
+0A0C:  BCF    03.5
+0A0D:  IORWF  0B,F
+....................   set_adc_channel(0); 
+0A0E:  MOVLW  00
+0A0F:  MOVWF  78
+0A10:  MOVF   1F,W
+0A11:  ANDLW  C7
+0A12:  IORWF  78,W
+0A13:  MOVWF  1F
+....................   output_low(PIN_D2); 
+0A14:  BSF    03.5
+0A15:  BCF    08.2
+0A16:  BCF    03.5
+0A17:  BCF    08.2
+....................   output_low(PIN_D3);   
+0A18:  BSF    03.5
+0A19:  BCF    08.3
+0A1A:  BCF    03.5
+0A1B:  BCF    08.3
+....................    
+....................   init_ext_eeprom(); 
+0A1C:  BCF    0A.3
+0A1D:  GOTO   230
+0A1E:  BSF    0A.3
+....................   lcd_ini(); 
+0A1F:  BCF    0A.3
+0A20:  GOTO   29F
+0A21:  BSF    0A.3
+....................    
+....................   printf(lcd_escreve,"\fIniciando..."); 
+0A22:  MOVLW  A3
+0A23:  BSF    03.6
+0A24:  MOVWF  0D
+0A25:  MOVLW  01
+0A26:  MOVWF  0F
+0A27:  BCF    0A.3
+0A28:  BCF    03.6
+0A29:  CALL   314
+0A2A:  BSF    0A.3
+....................   delay_ms(2000); 
+0A2B:  MOVLW  08
+0A2C:  MOVWF  60
+0A2D:  MOVLW  FA
+0A2E:  MOVWF  6F
+0A2F:  BCF    0A.3
+0A30:  CALL   23D
+0A31:  BSF    0A.3
+0A32:  DECFSZ 60,F
+0A33:  GOTO   22D
+....................   clearRAM(); 
+0A34:  BCF    0A.3
+0A35:  CALL   35A
+0A36:  BSF    0A.3
+....................    
+....................   int j; 
+....................   for(j = 0 ; j<255 ; j++ ) { 
+0A37:  CLRF   5F
+0A38:  INCFSZ 5F,W
+0A39:  GOTO   23B
+0A3A:  GOTO   244
+....................       write_ext_eeprom(j,0xFF); 
+0A3B:  MOVF   5F,W
+0A3C:  MOVWF  6C
+0A3D:  MOVLW  FF
+0A3E:  MOVWF  6D
+0A3F:  BCF    0A.3
+0A40:  CALL   40E
+0A41:  BSF    0A.3
+....................   } 
+0A42:  INCF   5F,F
+0A43:  GOTO   238
+....................    
+....................    
+....................   // Cadastra o primeiro Usuario(ADM)==========  
+....................       handleVerifySignInAdm(); 
+....................   //===========================================   
+....................    
+....................   while(1){ 
+....................    
+....................     switch(screen) { 
+*
+0A8F:  MOVF   48,W
+0A90:  BTFSC  03.2
+0A91:  GOTO   296
+0A92:  XORLW  01
+0A93:  BTFSC  03.2
+0A94:  GOTO   375
+0A95:  GOTO   65F
+....................       case 0:{ 
+....................          home(); 
+....................          break; 
+*
+0B74:  GOTO   669
+....................       } 
+....................       case 1:{ 
+....................          menu(); 
+....................          break; 
+*
+0E5E:  GOTO   669
+....................       } 
+....................       default:{ 
+....................          printf(lcd_escreve,"\fDeu tudo errado"); 
+0E5F:  MOVLW  AA
+0E60:  BSF    03.6
+0E61:  MOVWF  0D
+0E62:  MOVLW  01
+0E63:  MOVWF  0F
+0E64:  BCF    0A.3
+0E65:  BCF    03.6
+0E66:  CALL   314
+0E67:  BSF    0A.3
+....................          break; 
+0E68:  GOTO   669
+....................       } 
+....................    } 
+....................  }  
+0E69:  GOTO   28F
+....................   
+....................  
+.................... } 
+....................  
+.................... //======================================================================= 
+....................  
+....................  
+.................... //============================FunÃ§oes==================================== 
+.................... void home(){ 
+*
+01D6:  DATA 00,00
+....................   inicio: 
+*
+0E6A:  SLEEP
+....................   handeInputsIDByUser();   
+*
+0A96:  CALL   000
+....................   if(screen == 1) return; 
+0A97:  DECFSZ 48,W
+0A98:  GOTO   29A
+0A99:  GOTO   374
+....................   if(checkId() == 0) { 
+*
+0AE6:  MOVF   78,F
+0AE7:  BTFSS  03.2
+0AE8:  GOTO   2FC
+....................    printf(lcd_escreve,"\fID nao existe"); 
+0AE9:  MOVLW  B3
+0AEA:  BSF    03.6
+0AEB:  MOVWF  0D
+0AEC:  MOVLW  01
+0AED:  MOVWF  0F
+0AEE:  BCF    0A.3
+0AEF:  BCF    03.6
+0AF0:  CALL   314
+0AF1:  BSF    0A.3
+....................    delay_ms(1500); 
+0AF2:  MOVLW  06
+0AF3:  MOVWF  60
+0AF4:  MOVLW  FA
+0AF5:  MOVWF  6F
+0AF6:  BCF    0A.3
+0AF7:  CALL   23D
+0AF8:  BSF    0A.3
+0AF9:  DECFSZ 60,F
+0AFA:  GOTO   2F4
+....................    goto inicio; 
+0AFB:  GOTO   296
+....................   } 
+....................   // 0 = home  screen == 0 || 
+....................    handleSavePinOnRam(); 
+0AFC:  CALL   0C2
+....................    if(checkPIN() == 1){ 
+*
+0B33:  DECFSZ 78,W
+0B34:  GOTO   35E
+....................          if(isUserOk == 1) { 
+0B35:  DECFSZ 4A,W
+0B36:  GOTO   34A
+....................             printf(lcd_escreve,"\fAcesso\rAutorizado!"); 
+0B37:  MOVLW  BB
+0B38:  BSF    03.6
+0B39:  MOVWF  0D
+0B3A:  MOVLW  01
+0B3B:  MOVWF  0F
+0B3C:  BCF    0A.3
+0B3D:  BCF    03.6
+0B3E:  CALL   314
+0B3F:  BSF    0A.3
+....................             delay_ms(1500); 
+0B40:  MOVLW  06
+0B41:  MOVWF  60
+0B42:  MOVLW  FA
+0B43:  MOVWF  6F
+0B44:  BCF    0A.3
+0B45:  CALL   23D
+0B46:  BSF    0A.3
+0B47:  DECFSZ 60,F
+0B48:  GOTO   342
+....................          } else{ 
+0B49:  GOTO   35D
+....................             printf(lcd_escreve,"\fCadastro Expirado"); 
+0B4A:  MOVLW  C5
+0B4B:  BSF    03.6
+0B4C:  MOVWF  0D
+0B4D:  MOVLW  01
+0B4E:  MOVWF  0F
+0B4F:  BCF    0A.3
+0B50:  BCF    03.6
+0B51:  CALL   314
+0B52:  BSF    0A.3
+....................             delay_ms(1500); 
+0B53:  MOVLW  06
+0B54:  MOVWF  60
+0B55:  MOVLW  FA
+0B56:  MOVWF  6F
+0B57:  BCF    0A.3
+0B58:  CALL   23D
+0B59:  BSF    0A.3
+0B5A:  DECFSZ 60,F
+0B5B:  GOTO   355
+....................             return; 
+0B5C:  GOTO   374
+....................          } 
+....................    }else { 
+0B5D:  GOTO   371
+....................          printf(lcd_escreve,"\fPIN incorreto"); 
+0B5E:  MOVLW  CF
+0B5F:  BSF    03.6
+0B60:  MOVWF  0D
+0B61:  MOVLW  01
+0B62:  MOVWF  0F
+0B63:  BCF    0A.3
+0B64:  BCF    03.6
+0B65:  CALL   314
+0B66:  BSF    0A.3
+....................          delay_ms(3000); 
+0B67:  MOVLW  0C
+0B68:  MOVWF  60
+0B69:  MOVLW  FA
+0B6A:  MOVWF  6F
+0B6B:  BCF    0A.3
+0B6C:  CALL   23D
+0B6D:  BSF    0A.3
+0B6E:  DECFSZ 60,F
+0B6F:  GOTO   369
+....................          goto inicio; 
+0B70:  GOTO   296
+....................       } 
+....................    
+....................  clearRAM(); 
+0B71:  BCF    0A.3
+0B72:  CALL   35A
+0B73:  BSF    0A.3
+.................... } 
+....................   
+.................... void menu(){ 
+*
+0B75:  CLRF   60
+....................    int acessoAoMenu = 0; // 0 = negado; 
+....................    printf(lcd_escreve,"\fAcesso Restrito"); 
+0B76:  MOVLW  D7
+0B77:  BSF    03.6
+0B78:  MOVWF  0D
+0B79:  MOVLW  01
+0B7A:  MOVWF  0F
+0B7B:  BCF    0A.3
+0B7C:  BCF    03.6
+0B7D:  CALL   314
+0B7E:  BSF    0A.3
+....................    delay_ms(1500); 
+0B7F:  MOVLW  06
+0B80:  MOVWF  64
+0B81:  MOVLW  FA
+0B82:  MOVWF  6F
+0B83:  BCF    0A.3
+0B84:  CALL   23D
+0B85:  BSF    0A.3
+0B86:  DECFSZ 64,F
+0B87:  GOTO   381
+....................    printf(lcd_escreve,"\fNecessario Logar"); 
+0B88:  MOVLW  E0
+0B89:  BSF    03.6
+0B8A:  MOVWF  0D
+0B8B:  MOVLW  01
+0B8C:  MOVWF  0F
+0B8D:  BCF    0A.3
+0B8E:  BCF    03.6
+0B8F:  CALL   314
+0B90:  BSF    0A.3
+....................    delay_ms(1500); 
+0B91:  MOVLW  06
+0B92:  MOVWF  64
+0B93:  MOVLW  FA
+0B94:  MOVWF  6F
+0B95:  BCF    0A.3
+0B96:  CALL   23D
+0B97:  BSF    0A.3
+0B98:  DECFSZ 64,F
+0B99:  GOTO   393
+....................    inicio: 
+....................    handeInputsIDByUser(); 
+0B9A:  CALL   000
+....................     
+....................    if(!getIdADMOnEeprom()){ 
+*
+0BB6:  MOVF   78,F
+0BB7:  BTFSS  03.2
+0BB8:  GOTO   3CD
+....................       printf(lcd_escreve,"\fID nao existe "); 
+0BB9:  MOVLW  E9
+0BBA:  BSF    03.6
+0BBB:  MOVWF  0D
+0BBC:  MOVLW  01
+0BBD:  MOVWF  0F
+0BBE:  BCF    0A.3
+0BBF:  BCF    03.6
+0BC0:  CALL   314
+0BC1:  BSF    0A.3
+....................       delay_ms(1500); 
+0BC2:  MOVLW  06
+0BC3:  MOVWF  64
+0BC4:  MOVLW  FA
+0BC5:  MOVWF  6F
+0BC6:  BCF    0A.3
+0BC7:  CALL   23D
+0BC8:  BSF    0A.3
+0BC9:  DECFSZ 64,F
+0BCA:  GOTO   3C4
+....................       goto inicio; 
+0BCB:  GOTO   39A
+....................    }else { 
+0BCC:  GOTO   415
+....................       handleSavePinOnRam(); 
+0BCD:  CALL   0C2
+....................       if(!getPinADMOnEeprom()) { 
+*
+0BEA:  MOVF   78,F
+0BEB:  BTFSS  03.2
+0BEC:  GOTO   401
+....................          printf(lcd_escreve,"\fPIN Errado"); 
+0BED:  MOVLW  F1
+0BEE:  BSF    03.6
+0BEF:  MOVWF  0D
+0BF0:  MOVLW  01
+0BF1:  MOVWF  0F
+0BF2:  BCF    0A.3
+0BF3:  BCF    03.6
+0BF4:  CALL   314
+0BF5:  BSF    0A.3
+....................          delay_ms(1500); 
+0BF6:  MOVLW  06
+0BF7:  MOVWF  64
+0BF8:  MOVLW  FA
+0BF9:  MOVWF  6F
+0BFA:  BCF    0A.3
+0BFB:  CALL   23D
+0BFC:  BSF    0A.3
+0BFD:  DECFSZ 64,F
+0BFE:  GOTO   3F8
+....................          goto inicio; 
+0BFF:  GOTO   39A
+....................  
+....................       }else { 
+0C00:  GOTO   415
+....................          printf(lcd_escreve,"\fAcesso Autorizado"); 
+0C01:  MOVLW  F7
+0C02:  BSF    03.6
+0C03:  MOVWF  0D
+0C04:  MOVLW  01
+0C05:  MOVWF  0F
+0C06:  BCF    0A.3
+0C07:  BCF    03.6
+0C08:  CALL   314
+0C09:  BSF    0A.3
+....................          delay_ms(1500); 
+0C0A:  MOVLW  06
+0C0B:  MOVWF  64
+0C0C:  MOVLW  FA
+0C0D:  MOVWF  6F
+0C0E:  BCF    0A.3
+0C0F:  CALL   23D
+0C10:  BSF    0A.3
+0C11:  DECFSZ 64,F
+0C12:  GOTO   40C
+....................          acessoAoMenu = 1; 
+0C13:  MOVLW  01
+0C14:  MOVWF  60
+....................       } 
+....................    } 
+....................   
+....................     
+....................    if(acessoAoMenu) { 
+0C15:  MOVF   60,F
+0C16:  BTFSC  03.2
+0C17:  GOTO   65E
+....................       int exit = 0; 
+....................       int indexMenu = 0; 
+....................       char tecla; 
+0C18:  CLRF   61
+0C19:  CLRF   62
+....................       printf(lcd_escreve,"\f%s",admMenu[indexMenu]); 
+0C1A:  MOVF   62,W
+0C1B:  MOVWF  64
+0C1C:  MOVLW  0A
+0C1D:  MOVWF  65
+0C1E:  CALL   12E
+0C1F:  MOVF   78,W
+0C20:  MOVWF  64
+0C21:  MOVLW  0C
+0C22:  MOVWF  6E
+0C23:  BCF    0A.3
+0C24:  CALL   2DC
+0C25:  BSF    0A.3
+0C26:  MOVLW  39
+0C27:  BSF    03.6
+0C28:  MOVWF  0D
+0C29:  MOVLW  00
+0C2A:  MOVWF  0F
+0C2B:  BCF    03.6
+0C2C:  MOVF   64,W
+0C2D:  BSF    03.6
+0C2E:  ADDWF  0D,F
+0C2F:  BTFSC  03.0
+0C30:  INCF   0F,F
+....................       while(!exit) { 
+*
+0C53:  BCF    03.6
+0C54:  MOVF   61,F
+0C55:  BTFSS  03.2
+0C56:  GOTO   65E
+....................         tecla = saveCharPressByUser ();  
+0C57:  BCF    0A.3
+0C58:  CALL   5DE
+0C59:  BSF    0A.3
+0C5A:  MOVF   78,W
+0C5B:  MOVWF  63
+....................         switch(tecla) { 
+0C5C:  MOVF   63,W
+0C5D:  XORLW  34
+0C5E:  BTFSC  03.2
+0C5F:  GOTO   46A
+0C60:  XORLW  02
+0C61:  BTFSC  03.2
+0C62:  GOTO   472
+0C63:  XORLW  77
+0C64:  BTFSC  03.2
+0C65:  GOTO   47A
+0C66:  XORLW  6B
+0C67:  BTFSC  03.2
+0C68:  GOTO   619
+0C69:  GOTO   61D
+....................            case '4': { 
+....................                if(indexMenu<=0){ 
+0C6A:  MOVF   62,F
+0C6B:  BTFSS  03.2
+0C6C:  GOTO   470
+....................                   indexMenu = 2 ; 
+0C6D:  MOVLW  02
+0C6E:  MOVWF  62
+....................                }else { 
+0C6F:  GOTO   471
+....................                   indexMenu--; 
+0C70:  DECF   62,F
+....................                } 
+....................                break; 
+0C71:  GOTO   61E
+....................            } 
+....................            case '6': { 
+....................             if(indexMenu >=2) { 
+0C72:  MOVF   62,W
+0C73:  SUBLW  01
+0C74:  BTFSC  03.0
+0C75:  GOTO   478
+....................                indexMenu = 0; 
+0C76:  CLRF   62
+....................             }else { 
+0C77:  GOTO   479
+....................                indexMenu++; 
+0C78:  INCF   62,F
+....................             } 
+....................             break; 
+0C79:  GOTO   61E
+....................            } 
+....................            case 'A':{ 
+....................                if(indexMenu == 0 ) { 
+0C7A:  MOVF   62,F
+0C7B:  BTFSS  03.2
+0C7C:  GOTO   4A9
+....................                   printf(lcd_escreve,"\fRedirecionar\rCadastro"); 
+0C7D:  MOVLW  01
+0C7E:  BSF    03.6
+0C7F:  MOVWF  0D
+0C80:  MOVLW  02
+0C81:  MOVWF  0F
+0C82:  BCF    0A.3
+0C83:  BCF    03.6
+0C84:  CALL   314
+0C85:  BSF    0A.3
+....................                   cadastro = 1; 
+0C86:  MOVLW  01
+0C87:  MOVWF  4C
+....................                   delay_ms(1500); 
+0C88:  MOVLW  06
+0C89:  MOVWF  64
+0C8A:  MOVLW  FA
+0C8B:  MOVWF  6F
+0C8C:  BCF    0A.3
+0C8D:  CALL   23D
+0C8E:  BSF    0A.3
+0C8F:  DECFSZ 64,F
+0C90:  GOTO   48A
+....................                   signIn(); 
+....................                   clearRAM(); 
+*
+0CA4:  BCF    0A.3
+0CA5:  CALL   35A
+0CA6:  BSF    0A.3
+....................                   cadastro = 0; 
+0CA7:  CLRF   4C
+....................                }else if (indexMenu == 1) { 
+0CA8:  GOTO   618
+0CA9:  DECFSZ 62,W
+0CAA:  GOTO   54F
+....................                   printf(lcd_escreve,"\fRedirecionar Deletar"); 
+0CAB:  MOVLW  0D
+0CAC:  BSF    03.6
+0CAD:  MOVWF  0D
+0CAE:  MOVLW  02
+0CAF:  MOVWF  0F
+0CB0:  BCF    0A.3
+0CB1:  BCF    03.6
+0CB2:  CALL   314
+0CB3:  BSF    0A.3
+....................                   delay_ms(1500); 
+0CB4:  MOVLW  06
+0CB5:  MOVWF  64
+0CB6:  MOVLW  FA
+0CB7:  MOVWF  6F
+0CB8:  BCF    0A.3
+0CB9:  CALL   23D
+0CBA:  BSF    0A.3
+0CBB:  DECFSZ 64,F
+0CBC:  GOTO   4B6
+....................                   handleDeleteUserOnEeprom(); 
+....................                }else if (indexMenu == 2 ) { 
+*
+0D4E:  GOTO   618
+0D4F:  MOVF   62,W
+0D50:  SUBLW  02
+0D51:  BTFSS  03.2
+0D52:  GOTO   618
+....................                   printf(lcd_escreve,"\fRedirecionar Deletar"); 
+0D53:  MOVLW  18
+0D54:  BSF    03.6
+0D55:  MOVWF  0D
+0D56:  MOVLW  02
+0D57:  MOVWF  0F
+0D58:  BCF    0A.3
+0D59:  BCF    03.6
+0D5A:  CALL   314
+0D5B:  BSF    0A.3
+....................                   delay_ms(1500); 
+0D5C:  MOVLW  06
+0D5D:  MOVWF  64
+0D5E:  MOVLW  FA
+0D5F:  MOVWF  6F
+0D60:  BCF    0A.3
+0D61:  CALL   23D
+0D62:  BSF    0A.3
+0D63:  DECFSZ 64,F
+0D64:  GOTO   55E
+....................                   handleEditUser(); 
+....................                } 
+....................                break; 
+*
+0E18:  GOTO   61E
+....................            } 
+....................            case '*': { 
+....................             exit =1; 
+0E19:  MOVLW  01
+0E1A:  MOVWF  61
+....................             screen = 0; // 0 => Home 
+0E1B:  CLRF   48
+....................             break; 
+0E1C:  GOTO   61E
+....................            } 
+....................            default: { 
+....................             break; 
+0E1D:  GOTO   61E
+....................            } 
+....................         } 
+....................        printf(lcd_escreve,"\f%s",admMenu[indexMenu]); 
+0E1E:  MOVF   62,W
+0E1F:  MOVWF  64
+0E20:  MOVLW  0A
+0E21:  MOVWF  65
+0E22:  CALL   12E
+0E23:  MOVF   78,W
+0E24:  MOVWF  64
+0E25:  MOVLW  0C
+0E26:  MOVWF  6E
+0E27:  BCF    0A.3
+0E28:  CALL   2DC
+0E29:  BSF    0A.3
+0E2A:  MOVLW  39
+0E2B:  BSF    03.6
+0E2C:  MOVWF  0D
+0E2D:  MOVLW  00
+0E2E:  MOVWF  0F
+0E2F:  BCF    03.6
+0E30:  MOVF   64,W
+0E31:  BSF    03.6
+0E32:  ADDWF  0D,F
+0E33:  BTFSC  03.0
+0E34:  INCF   0F,F
+....................        delay_ms(100); 
+*
+0E57:  MOVLW  64
+0E58:  BCF    03.6
+0E59:  MOVWF  6F
+0E5A:  BCF    0A.3
+0E5B:  CALL   23D
+0E5C:  BSF    0A.3
+....................       } 
+0E5D:  GOTO   454
+....................    } 
+.................... } 
+....................  
+....................  
+....................  
+.................... void handleVerifySignInAdm () { 
+....................     int j; 
+....................     for(j=0;j<=2;j++) { 
+*
+0A44:  CLRF   60
+0A45:  MOVF   60,W
+0A46:  SUBLW  02
+0A47:  BTFSS  03.0
+0A48:  GOTO   254
+....................         if(read_ext_eeprom(j) == 0xFF) { 
+0A49:  MOVF   60,W
+0A4A:  MOVWF  70
+0A4B:  BCF    0A.3
+0A4C:  CALL   45A
+0A4D:  BSF    0A.3
+0A4E:  INCFSZ 78,W
+0A4F:  GOTO   252
+....................             firstAdm = 1; 
+0A50:  MOVLW  01
+0A51:  MOVWF  46
+....................         } 
+....................     } 
+0A52:  INCF   60,F
+0A53:  GOTO   245
+....................     while(firstAdm) { 
+0A54:  MOVF   46,F
+0A55:  BTFSC  03.2
+0A56:  GOTO   28F
+....................       printf(lcd_escreve,"\fSem ADM"); 
+0A57:  MOVLW  23
+0A58:  BSF    03.6
+0A59:  MOVWF  0D
+0A5A:  MOVLW  02
+0A5B:  MOVWF  0F
+0A5C:  BCF    0A.3
+0A5D:  BCF    03.6
+0A5E:  CALL   314
+0A5F:  BSF    0A.3
+....................       delay_ms(3000); 
+0A60:  MOVLW  0C
+0A61:  MOVWF  61
+0A62:  MOVLW  FA
+0A63:  MOVWF  6F
+0A64:  BCF    0A.3
+0A65:  CALL   23D
+0A66:  BSF    0A.3
+0A67:  DECFSZ 61,F
+0A68:  GOTO   262
+....................       printf(lcd_escreve,"\fCadastre agora"); 
+0A69:  MOVLW  28
+0A6A:  BSF    03.6
+0A6B:  MOVWF  0D
+0A6C:  MOVLW  02
+0A6D:  MOVWF  0F
+0A6E:  BCF    0A.3
+0A6F:  BCF    03.6
+0A70:  CALL   314
+0A71:  BSF    0A.3
+....................       delay_ms(1500); 
+0A72:  MOVLW  06
+0A73:  MOVWF  61
+0A74:  MOVLW  FA
+0A75:  MOVWF  6F
+0A76:  BCF    0A.3
+0A77:  CALL   23D
+0A78:  BSF    0A.3
+0A79:  DECFSZ 61,F
+0A7A:  GOTO   274
+....................       signIn();  
+....................     } 
+*
+0A8E:  GOTO   254
+.................... } 
+....................  
+....................  
+....................  
+.................... void signIn() { 
+....................   clearRAM(); 
+*
+0A7B:  BCF    0A.3
+0A7C:  CALL   35A
+0A7D:  BSF    0A.3
+*
+0C91:  BCF    0A.3
+0C92:  CALL   35A
+0C93:  BSF    0A.3
+....................   handeInputsIDByUser(); 
+*
+0A7E:  CALL   000
+*
+0C94:  CALL   000
+....................   handleSavePinOnRam(); 
+*
+0A7F:  CALL   0C2
+*
+0C95:  CALL   0C2
+....................   memoryUserPosition[7]="1"; // Todo novo usuario que faz cadastro jÃ¡ Ã© aceito como valido, caso deixei de pagar tera como alterar isso. 
+*
+0A80:  MOVLW  31
+0A81:  MOVWF  45
+*
+0C96:  MOVLW  31
+0C97:  MOVWF  45
+....................   if( !firstAdm ) { 
+*
+0A82:  MOVF   46,F
+0A83:  BTFSS  03.2
+0A84:  GOTO   289
+*
+0C98:  MOVF   46,F
+0C99:  BTFSS  03.2
+0C9A:  GOTO   49F
+....................      saveSignInEeprom(); 
+*
+0A85:  BCF    0A.3
+0A86:  CALL   522
+0A87:  BSF    0A.3
+*
+0C9B:  BCF    0A.3
+0C9C:  CALL   522
+0C9D:  BSF    0A.3
+....................   }else { 
+*
+0A88:  GOTO   28E
+*
+0C9E:  GOTO   4A4
+....................     saveSignInEeprom(); 
+*
+0A89:  BCF    0A.3
+0A8A:  CALL   522
+0A8B:  BSF    0A.3
+*
+0C9F:  BCF    0A.3
+0CA0:  CALL   522
+0CA1:  BSF    0A.3
+....................     firstAdm = 0; 
+*
+0A8C:  CLRF   46
+*
+0CA2:  CLRF   46
+....................     screen=0; // 0 = home 
+*
+0A8D:  CLRF   48
+*
+0CA3:  CLRF   48
+....................   } 
+.................... } 
+....................   
+....................  
+
+Configuration Fuses:
+   Word  1: 3F3A   HS NOWDT NOPUT NODEBUG NOPROTECT NOBROWNOUT NOLVP NOCPD NOWRT

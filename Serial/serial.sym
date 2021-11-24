@@ -1,0 +1,373 @@
+004-005 @READ_PROGRAM_MEMORY8.P1
+004-005 @WRITE_PROGRAM_MEMORY8.P2
+008     PSP_DATA
+015     CCP_1
+015     CCP_1_LOW
+016     CCP_1_HIGH
+01B     CCP_2
+01B     CCP_2_LOW
+01C     CCP_2_HIGH
+020     @INTERRUPT_AREA
+021     @INTERRUPT_AREA
+022     @INTERRUPT_AREA
+023     @INTERRUPT_AREA
+024     @INTERRUPT_AREA
+025     @INTERRUPT_AREA
+026     @INTERRUPT_AREA
+027     @INTERRUPT_AREA
+028     @INTERRUPT_AREA
+029     @INTERRUPT_AREA
+02A     @INTERRUPT_AREA
+02B     @TRIS_C
+02C     rx_wr_index
+02D     lock_state
+02E     rxd
+02F     lido
+030     valid_data_count
+031-06C rx_buffer
+06D.0   data_avail
+06D.1   got_id
+06D.2   del
+06D.3   got_del
+06D.4   edit
+06D.5   got_edit
+06D.6   got_all_users
+06D.7   data_users
+06E     indexArrayDigitUser
+06F-070 i
+071     firstAdm
+072     tecla
+073     screen
+074     savePositionForValidID
+075     isUserOk
+076     deleteByPIC
+077     @SCRATCH
+078     @SCRATCH
+078     _RETURN_
+079     @SCRATCH
+07A     @SCRATCH
+07B     cadastro
+07C     qtdDeUsuariosJaCadastrado
+07D     received
+07E.0   interrupt_flag
+07F     @INTERRUPT_AREA
+09C.6   C1OUT
+09C.7   C2OUT
+0A0-0A7 memoryUserPosition
+0A8-0AF C1
+0B0-0B1 @sprintf_string
+0B2     MAIN.value
+0B3     MAIN.value_recebido
+0B4     MAIN.cmd
+0B5     MAIN.address
+0B6     MAIN.i
+0B7     MAIN.tensao
+0B8     MAIN.y
+0B9     MAIN.j
+0BA     lcd_ini.conta
+0BA     checkPIN.indexMemoryRAM
+0BA     menu.acessoAoMenu
+0BA     checkId.isEqual
+0BA     handleVerifySignInAdm.j
+0BA     MAIN.@SCRATCH1
+0BA     home.@SCRATCH1
+0BB     checkPIN.isEqual
+0BB     menu.exit
+0BB     checkId.indexEeprom
+0BB     lcd_ini.@SCRATCH1
+0BB     handleVerifySignInAdm.@SCRATCH1
+0BC     menu.indexMenu
+0BC     checkId.exit
+0BC     checkPIN.j
+0BD     checkId.g
+0BD     checkPIN.indexEeprom
+0BD     menu.tecla
+0BE     clearRAM.j
+0BE     handleSavePinOnRam.exit
+0BE     @MUL88.P1
+0BE     getIdADMOnEeprom.isEqual
+0BE     handleEditUser.exit
+0BE     getPinADMOnEeprom.isEqual
+0BE     handleDeleteUserOnEeprom.exit
+0BE     handeInputsIDByUser.exit
+0BE     checkId.@SCRATCH1
+0BE     checkPIN.@SCRATCH1
+0BE     menu.@SCRATCH1
+0BE     signIn.@SCRATCH1
+0BF     deletePINonRAM.i
+0BF     checkDoubleIDEeprom.hasIDEqual
+0BF     getIdADMOnEeprom.j
+0BF     @MUL88.P1
+0BF     checkExistIDOnEeprom.isEqual
+0BF     deleteUserOnEeprom.k
+0BF     deleteIDonRAM.i
+0BF     getPinADMOnEeprom.j
+0BF     telaEdicao.exit
+0BF     handleDeleteUserOnEeprom.@SCRATCH1
+0BF     handleEditUser.@SCRATCH1
+0BF     handeInputsIDByUser.@SCRATCH1
+0BF     handleSavePinOnRam.@SCRATCH1
+0BF     checkId.@SCRATCH2
+0BF     clearRAM.@SCRATCH1
+0BF     @PSTRINGC_613.@SCRATCH1
+0BF     signIn.@SCRATCH2
+0C0     checkDoubleIDEeprom.exit
+0C0     telaEdicao.status
+0C0     checkExistIDOnEeprom.indexEeprom
+0C0     handleDeleteUserOnEeprom.@SCRATCH2
+0C0     handleEditUser.@SCRATCH2
+0C0     getIdADMOnEeprom.@SCRATCH1
+0C0     getPinADMOnEeprom.@SCRATCH1
+0C0     deleteUserOnEeprom.@SCRATCH1
+0C0     handeInputsIDByUser.@SCRATCH2
+0C0     handleSavePinOnRam.@SCRATCH2
+0C0     clearRAM.@SCRATCH2
+0C0     deleteIDonRAM.@SCRATCH1
+0C0     deletePINonRAM.@SCRATCH1
+0C0     @PSTRINGC_613.@SCRATCH2
+0C0     signIn.@SCRATCH3
+0C1     checkExistIDOnEeprom.exit
+0C1     checkDoubleIDEeprom.indexEeprom
+0C1     saveCharPressByUser.actualChar
+0C1     telaEdicao.@SCRATCH1
+0C1     deleteIDonRAM.@SCRATCH2
+0C1     deletePINonRAM.@SCRATCH2
+0C1     signIn.@SCRATCH4
+0C2     editUserEeprom.isValid
+0C2-0C3 saveDataBaseOnEeprom.i
+0C2     tc_tecla.timeout
+0C2     deleteUserEeprom.isValid
+0C2     saveSignInEeprom.freeSpace
+0C2     checkDoubleIDEeprom.@SCRATCH1
+0C2     checkExistIDOnEeprom.@SCRATCH1
+0C3     tc_tecla.to
+0C3     saveSignInEeprom.j
+0C3     deleteUserEeprom.k
+0C3     editUserEeprom.@SCRATCH1
+0C3     checkDoubleIDEeprom.@SCRATCH2
+0C3     checkExistIDOnEeprom.@SCRATCH2
+0C4     saveSignInEeprom.indexMemoryRAM
+0C4-0C5 saveDataBaseOnEeprom.j
+0C4     tc_tecla.k
+0C4     checkByPc.isEqual
+0C4     deleteUserEeprom.@SCRATCH1
+0C5     searchFreePositionEeprom.read
+0C5     checkByPc.indexEeprom
+0C5     tc_tecla.@SCRATCH1
+0C5     saveSignInEeprom.@SCRATCH1
+0C6     checkByPc.exit
+0C6     searchFreePositionEeprom.i
+0C6     saveDataBaseOnEeprom.@SCRATCH1
+0C7     checkByPc.g
+0C7     saveDataBaseOnEeprom.@SCRATCH2
+0C8     saveDataBaseOnEeprom.@SCRATCH3
+0C8     checkByPc.@SCRATCH1
+0C9     checkByPc.@SCRATCH2
+0CA     read_ext_eeprom.address
+0CB     read_ext_eeprom.data
+0CC     @I2C_READ_1.P1
+0CD     @I2C_READ_1.@SCRATCH1
+0CE     @I2C_READ_1.@SCRATCH2
+0FF     @INTERRUPT_AREA
+10D-10E @WRITE_PROGRAM_MEMORY8.P1
+10D-10E @READ_PROGRAM_MEMORY8.P2
+110-13F saveDataBaseOnEeprom.BD
+140     @PSTRINGC7_613.@SCRATCH1
+141     write_ext_eeprom.address
+141     @PSTRINGC7_613.@SCRATCH2
+142     write_ext_eeprom.data
+142     @PSTRINGC7_613.@SCRATCH3
+143     lcd_escreve.c
+143.0   ext_eeprom_ready.ack
+143     @PSTRINGC7_613.@SCRATCH4
+144     @I2C_WRITE_1.P1
+144     @delay_ms1.P2
+144     lcd_pos_xy.x
+145     lcd_pos_xy.y
+146     lcd_pos_xy.endereco
+147     lcd_pos_xy.@SCRATCH1
+148     lcd_envia_byte.endereco
+149     lcd_envia_byte.dado
+14A     lcd_envia_byte.@SCRATCH1
+14B     lcd_envia_nibble.dado
+14C     RDA_isr.@SCRATCH1
+14D     RDA_isr.@SCRATCH2
+17F     @INTERRUPT_AREA
+1FF     @INTERRUPT_AREA
+27F     @INTERRUPT_AREA
+2FF     @INTERRUPT_AREA
+37F     @INTERRUPT_AREA
+3FF     @INTERRUPT_AREA
+47F     @INTERRUPT_AREA
+4FF     @INTERRUPT_AREA
+57F     @INTERRUPT_AREA
+5FF     @INTERRUPT_AREA
+67F     @INTERRUPT_AREA
+6FF     @INTERRUPT_AREA
+77F     @INTERRUPT_AREA
+7FF     @INTERRUPT_AREA
+87F     @INTERRUPT_AREA
+8FF     @INTERRUPT_AREA
+97F     @INTERRUPT_AREA
+9FF     @INTERRUPT_AREA
+A7F     @INTERRUPT_AREA
+AFF     @INTERRUPT_AREA
+B7F     @INTERRUPT_AREA
+BFF     @INTERRUPT_AREA
+C7F     @INTERRUPT_AREA
+CFF     @INTERRUPT_AREA
+D7F     @INTERRUPT_AREA
+DFF     @INTERRUPT_AREA
+E7F     @INTERRUPT_AREA
+EFF     @INTERRUPT_AREA
+F7F     @INTERRUPT_AREA
+FFF     @INTERRUPT_AREA
+
+ROM Allocation:
+000051  INI_LCD.call
+000055  INI_LCD.data
+000059  admMenu.call
+000059  admMenu.data
+000074  RDA_isr
+0000CD  @const704.call
+0000D4  @const712.call
+0000DB  @const714.call
+0000E5  @const716.call
+0000EC  @const717.call
+0000F4  @const720.call
+0000FD  @const722.call
+000104  @const723.call
+00010C  @const725.call
+000115  @const729.call
+00011A  @const734.call
+000121  @const738.call
+000126  @const739.call
+00012D  @const740.call
+000137  @const743.call
+000141  @const746.call
+000147  @const747.call
+00014E  @const748.call
+000158  @const749.call
+00015F  @const751.call
+000165  @const753.call
+00016E  @const754.call
+000175  @const755.call
+00017C  @const756.call
+000184  @const757.call
+00018B  @const771.call
+000192  @const773.call
+00019B  @const774.call
+0001A2  @const775.call
+0001A9  @const778.call
+0001AD  @const779.call
+0001B7  @const780.call
+0001BB  @const792.call
+0001C2  @const794.call
+0001C9  @const805.call
+0001D0  @const807.call
+0001D9  @const809.call
+0001E1  @const810.call
+0001EB  @const811.call
+0001F5  @const812.call
+0001FD  @const814.call
+000206  @const815.call
+00020F  @const817.call
+000217  @const818.call
+00021D  @const819.call
+000227  @const828.call
+000233  @const829.call
+00023E  @const830.call
+000249  @const833.call
+00024E  @const834.call
+000256  init_ext_eeprom
+000263  @delay_ms1
+000277  lcd_envia_nibble
+0002AE  lcd_envia_byte
+0002D7  lcd_ini
+00032C  lcd_escreve
+00034D  lcd_pos_xy
+00036F  @PSTRINGC7_613
+0003BF  clearRAM
+0003CF  @I2C_WRITE_1
+00042D  ext_eeprom_ready
+00047D  write_ext_eeprom
+0004CF  read_ext_eeprom
+00052B  @I2C_READ_1
+0005A5  saveSignInEeprom
+0005B8  searchFreePositionEeprom
+00063D  checkByPc
+000693  deleteIDonRAM
+0006AA  handeInputsIDByUser
+0006E9  checkDoubleIDEeprom
+00077C  handleSavePinOnRam
+0007C1  deletePINonRAM
+000800  saveCharPressByUser
+00080E  deleteUserEeprom
+000891  editUserEeprom
+00090B  saveDataBaseOnEeprom
+00097B  tc_tecla
+000ADB  @MUL88
+000B02  @PSTRINGC_613
+000B3D  checkExistIDOnEeprom
+001000  MAIN
+001000  @cinit1
+001027  @cinit2
+0010AF  handleVerifySignInAdm
+00111B  home
+001121  checkId
+001199  checkPIN
+00122C  menu
+001262  getIdADMOnEeprom
+0012A0  getPinADMOnEeprom
+001370  signIn
+0013AC  handleDeleteUserOnEeprom
+0013F7  deleteUserOnEeprom
+001481  handleEditUser
+0014CC  telaEdicao
+0136  inicio
+0136  inicio
+06AA  inicio
+0136  inicio
+0136  inicio
+
+Project Directory:
+    C:\Users\André\Documents\Engenharia Automação\6 semestre\Microcontroladores\Projetos\Serial\
+
+Project Files:
+    serial.c                                                [24-nov-21 15:07  CRC=2C684A43]
+    config.c                                                [24-nov-21 16:23  CRC=C158B857]
+    ..\..\..\..\..\..\..\..\Program Files (x86)\PICC\Devices\16F877A.h [08-set-15 15:15  CRC=B168AC0E]
+    mod_lcd.c                                               [23-out-21 15:19  CRC=4ADD02A2]
+    kbd_ext_board2.c                                        [09-fev-21 11:31  CRC=707A799E]
+    2401.c                                                  [23-jul-03 14:53  CRC=C4DE9711]
+    funcoesEeprom.c                                         [24-nov-21 16:55  CRC=8D6D7958]
+    ultilidades.c                                           [24-nov-21 13:49  CRC=36173312]
+
+Source signature=18FBA175
+Program memory checksum=0000
+Program memory CRC=0000
+Hex file CRC=A9B6
+
+Units:
+    serial (main)
+
+Compiler Settings:
+    Processor:      PIC16F877A
+    Pointer Size:   16
+    ADC Range:      0-255
+    Opt Level:      9
+    Short,Int,Long: UNSIGNED: 1,8,16
+    Float,Double:   32,32
+    Compile Mode:       CCS5
+
+Output Files:
+    XREF file:   serial.xsym
+    Errors:      serial.err
+    Ext Symbols: serial.esym
+    INHX8:       serial.hex
+    Symbols:     serial.sym
+    List:        serial.lst
+    Debug/COFF:  serial.cof
+    Project:     serial.ccspjt
+    Call Tree:   serial.tre
+    Statistics:  serial.STA

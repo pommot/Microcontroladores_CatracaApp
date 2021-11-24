@@ -1,0 +1,923 @@
+
+#include <16F877A.h>
+#device adc=8
+#FUSES HS                       //High speed Osc (> 4mhz for PCM/PCH) (>10mhz for PCD)
+#FUSES NOPUT                    //No Power Up Timer
+#FUSES NOPROTECT                //Code not protected from reading
+#FUSES NODEBUG                  //No Debug mode for ICD
+#FUSES NOBROWNOUT               //No brownout reset
+#FUSES NOLVP                    //No low voltage prgming, B3(PIC16) or B5(PIC18) used for I/O
+#FUSES NOCPD                    //No EE protection
+#FUSES NOWRT                    //Program memory not write protected
+
+#use delay(clock=20000000)
+#use rs232(baud=9600,parity=N,xmit=PIN_C6,rcv=PIN_C7,bits=8,stream=Wireless)
+
+//===================== Bibliotecas============================= 
+
+#ifndef lcd_enable
+#define lcd_enable     pin_E1      // pino enable do LCD
+#define lcd_rs         pin_E2      // pino rs do LCD
+//#define lcd_rw      pin_e2      // pino rw do LCD
+#define lcd_d4         pin_d4      // pino de dados d4 do LCD
+#define lcd_d5         pin_d5      // pino de dados d5 do LCD
+#define lcd_d6         pin_d6      // pino de dados d6 do LCD
+#define lcd_d7         pin_d7      // pino de dados d7 do LCD
+#endif
+
+#include "mod_lcd.c"
+#include "kbd_ext_board2.c"
+#include "2401.c"
+
+#define RX_BUFFER_SIZE 40 
+int8 rx_wr_index = 0; 
+int8 lock_state = 0, rxd,lido, valid_data_count; 
+unsigned int8 rx_buffer[RX_BUFFER_SIZE];
+int1 data_avail = FALSE, got_id = FALSE,del = FALSE,got_del=FALSE,edit,got_edit=FALSE,got_all_users=FALSE,data_users=FALSE;
+
+//==============================================================
+
+ 
+
+
+//======================= Protótipos ===============================
+void handleVerifySignInAdm(void);
+void signIn(void);
+char saveCharPressByUser (void); 
+void saveSignInEeprom(void);
+unsigned int16 searchFreePositionEeprom(void);
+unsigned int16 searchXPositionOnEeprom(void);
+void handeInputsIDByUser(void);
+void deleteIDonRAM(void);
+void handleSavePinOnRam(void);
+void deletePINonRAM(void);
+void home(void);
+void menu(void);
+int getIdADMOnEeprom(void);
+int getPinADMOnEeprom(void);
+void clearRAM(void);
+int checkId(void);
+int checkPIN(void) ;
+void deleteUserOnEeprom(void);
+int getQtdUsersOnEeprom(void);
+void deleteUser(void);
+void deleteUserEeprom(void);
+int checkByPc(void);
+void handleDeleteUserOnEeprom(void);
+void editUserEeprom(void);
+int checkExistIDOnEeprom(void);
+void deleteUserOnEeprom(void);
+void handleEditUser(void);
+void telaEdicao(void);
+void receberBancoDeDados(void);
+void saveDataBaseOnEeprom (void);
+void checkDoubleIDEeprom (void);
+//====================================================================
+
+
+//======================Variáveis globais/============================
+
+const char admMenu[3][10] = {"Cadastrar","Deletar","Editar"};
+int indexArrayDigitUser; // Essa var funciona como index do vetor que armazena oque o usuario digitou.
+unsigned int16 i = 0;
+unsigned char  memoryUserPosition[8];  
+int firstAdm;
+char tecla;
+int screen = 0;
+int savePositionForValidID=1;
+int isUserOk; 
+int deleteByPIC;
+int cadastro = 0;
+int qtdDeUsuariosJaCadastrado=1;
+
+
+
+char received; 
+int1 interrupt_flag=0;
+typedef struct  
+{
+char id[3];
+char senha[4]; 
+char status; 
+
+} Cliente;  
+Cliente C1; 
+
+
+/*
+   0 = home
+   1 = menu
+*/
+
+//==========================================================================
+
+
+//========================PORTA SERIAL======================================
+
+#int_RDA 
+void RDA_isr(void){ 
+    rx_buffer[rx_wr_index] = getc();
+    rxd = rx_buffer[rx_wr_index];
+    rx_wr_index++;
+
+    if (rx_wr_index > RX_BUFFER_SIZE) {
+     rx_wr_index = 0;
+    }
+
+    if (rxd == 'C'){     
+        got_id = TRUE; 
+        valid_data_count = 0; 
+        rx_wr_index = 0;
+    }
+    if (got_id  && valid_data_count++ >= 8){
+        data_avail = TRUE;
+        got_id = FALSE;
+    }
+
+
+    if (rxd == 'K'){     
+        got_all_users = TRUE; 
+        valid_data_count = 0; 
+        rx_wr_index = 0;
+    }
+    if (got_all_users  && valid_data_count++ >= 8){
+        data_users = TRUE;
+        got_all_users = FALSE;
+    }
+
+    
+    if (rxd == 'D'){     
+        got_del = TRUE; 
+        valid_data_count = 0; 
+        rx_wr_index = 0;
+    }else if(got_del && valid_data_count++ >=2) {
+        del = TRUE;
+        got_del = FALSE;
+    }
+
+    if (rxd == 'S'){     
+        got_edit = TRUE; 
+        valid_data_count =0; 
+        rx_wr_index = 0;
+    }else if(got_edit && valid_data_count++ >=3) {
+        edit = TRUE;
+        got_edit = FALSE;
+    }
+}
+
+//============================================================================
+//#include "C:\Users\João\Desktop\AAAA\main.h"
+
+//============================ VOID [MAIN]================================
+
+void main () {
+  BYTE value,value_recebido, cmd;
+  EEPROM_ADDRESS address;
+  
+  unsigned int i=0,tensao=0; signed int y=-50; 
+  setup_adc(ADC_CLOCK_DIV_16); 
+  setup_adc_ports(AN0);
+  setup_psp(PSP_DISABLED); 
+  setup_spi(SPI_SS_DISABLED); 
+  setup_timer_0(RTCC_INTERNAL|RTCC_DIV_1);
+  setup_timer_1(T1_DISABLED); 
+  setup_timer_2(T2_DISABLED,0,1); 
+  setup_comparator(NC_NC_NC_NC);
+  setup_vref(FALSE);
+  enable_interrupts(INT_RDA); 
+  enable_interrupts(GLOBAL);
+  set_adc_channel(0);
+  output_low(PIN_D2);
+  output_low(PIN_D3);  
+  
+  init_ext_eeprom();
+  lcd_ini();
+  
+  printf(lcd_escreve,"\fIniciando...");
+  delay_ms(2000);
+  clearRAM();
+  
+  int j;
+  for(j = 0 ; j<255 ; j++ ) {
+      write_ext_eeprom(j,0xFF);
+  }
+  
+  
+  // Cadastra o primeiro Usuario(ADM)========== 
+      handleVerifySignInAdm();
+  //===========================================  
+  
+  while(1){
+  
+    switch(screen) {
+      case 0:{
+         home();
+         break;
+      }
+      case 1:{
+         menu();
+         break;
+      }
+      default:{
+         printf(lcd_escreve,"\fDeu tudo errado");
+         break;
+      }
+   }
+ } 
+ 
+
+}
+
+//=======================================================================
+
+
+//============================Funçoes====================================
+void home(){
+  inicio:
+  handeInputsIDByUser();  
+  if(screen == 1) return;
+  if(checkId() == 0) {
+   printf(lcd_escreve,"\fID nao existe");
+   delay_ms(1500);
+   goto inicio;
+  }
+  // 0 = home  screen == 0 ||
+   handleSavePinOnRam();
+   if(checkPIN() == 1){
+         if(isUserOk == 1) {
+            printf(lcd_escreve,"\fAcesso\rAutorizado!");
+            delay_ms(1500);
+         } else{
+            printf(lcd_escreve,"\fCadastro Expirado");
+            delay_ms(1500);
+            return;
+         }
+   }else {
+         printf(lcd_escreve,"\fPIN incorreto");
+         delay_ms(3000);
+         goto inicio;
+      }
+  
+ clearRAM();
+}
+ 
+void menu(){
+   int acessoAoMenu = 0; // 0 = negado;
+   printf(lcd_escreve,"\fAcesso Restrito");
+   delay_ms(1500);
+   printf(lcd_escreve,"\fNecessario Logar");
+   delay_ms(1500);
+   inicio:
+   handeInputsIDByUser();
+   
+   if(!getIdADMOnEeprom()){
+      printf(lcd_escreve,"\fID nao existe ");
+      delay_ms(1500);
+      goto inicio;
+   }else {
+      handleSavePinOnRam();
+      if(!getPinADMOnEeprom()) {
+         printf(lcd_escreve,"\fPIN Errado");
+         delay_ms(1500);
+         goto inicio;
+
+      }else {
+         printf(lcd_escreve,"\fAcesso Autorizado");
+         delay_ms(1500);
+         acessoAoMenu = 1;
+      }
+   }
+ 
+   
+   if(acessoAoMenu) {
+      int exit = 0;
+      int indexMenu = 0;
+      char tecla;
+      printf(lcd_escreve,"\f%s",admMenu[indexMenu]);
+      while(!exit) {
+        tecla = saveCharPressByUser (); 
+        switch(tecla) {
+           case '4': {
+               if(indexMenu<=0){
+                  indexMenu = 2 ;
+               }else {
+                  indexMenu--;
+               }
+               break;
+           }
+           case '6': {
+            if(indexMenu >=2) {
+               indexMenu = 0;
+            }else {
+               indexMenu++;
+            }
+            break;
+           }
+           case 'A':{
+               if(indexMenu == 0 ) {
+                  printf(lcd_escreve,"\fRedirecionar\rCadastro");
+                  cadastro = 1;
+                  delay_ms(1500);
+                  signIn();
+                  clearRAM();
+                  cadastro = 0;
+               }else if (indexMenu == 1) {
+                  printf(lcd_escreve,"\fRedirecionar Deletar");
+                  delay_ms(1500);
+                  handleDeleteUserOnEeprom();
+               }else if (indexMenu == 2 ) {
+                  printf(lcd_escreve,"\fRedirecionar Deletar");
+                  delay_ms(1500);
+                  handleEditUser();
+               }
+               break;
+           }
+           case '*': {
+            exit =1;
+            screen = 0; // 0 => Home
+            break;
+           }
+           default: {
+            break;
+           }
+        }
+       printf(lcd_escreve,"\f%s",admMenu[indexMenu]);
+       delay_ms(100);
+      }
+   }
+}
+
+
+
+void handleVerifySignInAdm () {
+    int j;
+    for(j=0;j<=2;j++) {
+        if(read_ext_eeprom(j) == 0xFF) {
+            firstAdm = 1;
+        }
+    }
+    while(firstAdm) {
+      printf(lcd_escreve,"\fSem ADM");
+      delay_ms(3000);
+      printf(lcd_escreve,"\fCadastre agora");
+      delay_ms(1500);
+      signIn(); 
+    }
+}
+
+
+
+void signIn() {
+  clearRAM();
+  handeInputsIDByUser();
+  handleSavePinOnRam();
+  memoryUserPosition[7]="1"; // Todo novo usuario que faz cadastro já é aceito como valido, caso deixei de pagar tera como alterar isso.
+  if( !firstAdm ) {
+     saveSignInEeprom();
+  }else {
+    saveSignInEeprom();
+    firstAdm = 0;
+    screen=0; // 0 = home
+  }
+}
+
+
+char saveCharPressByUser () {
+  char actualChar = 255;
+  
+  while(actualChar == 255) {
+        if(data_avail) {
+            saveSignInEeprom();
+        } else if(del){
+            deleteUserEeprom();
+        }else if(edit){
+            editUserEeprom();
+        }else if (data_users) {
+            saveDataBaseOnEeprom();
+        }
+        
+        actualChar = tc_tecla(500);
+    }
+  return actualChar;
+}
+
+
+void handeInputsIDByUser() {
+  inicio:
+  printf(lcd_escreve,"\fDigite ID: \r");
+
+  indexArrayDigitUser = 0;
+  int exit = 0;
+ 
+  while(!exit) {
+    tecla = saveCharPressByUser();
+    switch (tecla) {
+      case 'A': {
+          if(indexArrayDigitUser<=0 ) {
+            printf(lcd_escreve,"\fCampo em Branco.");
+            delay_ms(1000);
+            printf(lcd_escreve,"\fDigite ID: \r");
+          }else {
+             if(cadastro == 1) {
+                if(checkDoubleIDEeprom() == 1) {
+                  printf(lcd_escreve,"\fID ja existe");
+                  delay_ms(1000);
+                  goto inicio;
+               }
+               else
+               {
+                  exit = 1;
+               }
+             }else {
+               exit = 1;
+             }
+            
+            break;
+         }
+      }
+      case 'C':  {
+        indexArrayDigitUser = 0 ;
+        deleteIDonRAM();
+        break;
+      }
+      case '*': {
+         exit=1;
+         screen=1; // 1 = menu 
+      }
+      default: {
+        if(indexArrayDigitUser<=2) {
+          printf(lcd_escreve,"%c",tecla);
+          memoryUserPosition[indexArrayDigitUser] = tecla;
+          indexArrayDigitUser++;
+        }
+        break;
+      }
+    }
+  }
+}
+
+void  handleSavePinOnRam() {
+   indexArrayDigitUser = 3;
+   int exit = 0 ;
+   printf(lcd_escreve,"\fPIN:\r");
+   while(!exit) {
+      tecla = saveCharPressByUser ();
+      switch(tecla) {
+         case 'A': {
+            if(indexArrayDigitUser<=3) {
+                printf(lcd_escreve,"\f Senha obrigatoria");
+                delay_ms(1000);
+                printf(lcd_escreve,"\fPIN:\r");
+
+            }else {
+               exit = 1;
+            }
+            break;
+         }
+         case 'C':  {
+           indexArrayDigitUser = 3 ;
+           deletePINonRAM();
+           break;
+         }
+         default: {
+           if(indexArrayDigitUser<=6) {
+             printf(lcd_escreve,"%c",tecla);
+             memoryUserPosition[indexArrayDigitUser] = tecla;
+             indexArrayDigitUser++;
+           }
+           break;
+         }
+      }
+   }
+}
+
+
+int checkId(){
+   int isEqual = 1;
+   int indexEeprom = 1;
+   int exit =0;
+   int g;
+   while(!exit){
+      for(i=0;i<=2;i++){
+           if(read_ext_eeprom(i+indexEeprom*8 ) != memoryUserPosition[i]) {
+              isEqual = 0;
+           }
+      }
+      if(isEqual) {
+         exit=1 ;
+         savePositionForValidID = indexEeprom *8;
+      }else {
+         isEqual=1;
+         indexEeprom++;
+      }
+       
+      if( indexEeprom == 65) {
+       exit =1;
+       isEqual = 0 ;
+      }
+   }
+   
+   return isEqual ;
+}
+
+int checkPIN() {
+   int indexMemoryRAM=3;
+   int isEqual = 1;
+   int j;
+   int indexEeprom = savePositionForValidID + 3;
+   for(j=indexEeprom;j<=indexEeprom + 3 ; j++){
+      if(read_ext_eeprom(j) != memoryUserPosition[indexMemoryRAM]) {
+         isEqual = 0;
+      }
+      indexMemoryRAM++;
+   }
+   if(isEqual == 1) {
+      if(read_ext_eeprom(indexEeprom+4)== '1') {
+         isUserOk = 1;
+      }else {
+         isUserOk = 0;
+      }
+    
+      
+   }
+   return isEqual;
+}
+
+void clearRAM() {
+   int j;
+   for(j=0;j<=7;j++){
+      memoryUserPosition[j] = 0xFF;
+   }
+}
+
+void deleteIDonRAM() {
+   int i;
+   for(i=0;i<=2;i++) {
+     memoryUserPosition[i] = 0xFF; 
+   }
+   printf(lcd_escreve,"\fDigite ID:\r");
+}
+
+void deletePINonRAM() {
+   int i;
+   for(i=3;i<=6;i++) {
+     memoryUserPosition[i] = 0xFF; 
+   }
+   printf(lcd_escreve,"\fDigite PIN:\r");
+
+}
+void saveDataBaseOnEeprom () {
+  printf(lcd_escreve,"\fBaixando BD");
+  int16 i;
+  int16 j;
+  char BD[40];
+  
+  for( j= 0 ; j<= 40; j++) 
+  {
+    BD[j] = rx_buffer[j]; 
+   
+  }
+
+   for(i = 0 ; i<40 ; i++ ) 
+   {
+      write_ext_eeprom(i, BD[i]);
+   }  
+
+  printf(lcd_escreve,"\fDigite ID:\r");
+
+
+}
+
+void handleDeleteUserOnEeprom(){
+  inicio:
+  printf(lcd_escreve,"\fID para Deletar:\r");
+  indexArrayDigitUser = 0;
+  int exit = 0;
+  while(!exit) {
+    tecla = saveCharPressByUser();
+    switch (tecla) {
+      case 'A': {
+          if(memoryUserPosition[indexArrayDigitUser] <=0) {
+            printf(lcd_escreve,"\fCampo vazio");
+            delay_ms(1000);
+            goto inicio;
+          }else {
+            if(checkExistIDOnEeprom() == 1) {
+                deleteUserOnEeprom();
+                exit = 1;  
+            }else {
+                printf(lcd_escreve,"\fID nao existe");
+                delay_ms(1000);
+                goto inicio;
+            }
+          }
+         break;
+      }
+      case 'C':  {
+        indexArrayDigitUser = 0 ;
+        deleteIDonRAM();
+        break;
+      }
+      case '*': {
+         exit=1;
+         screen=1; // 1 = menu 
+      }
+      default: {
+        if(indexArrayDigitUser<=2) {
+          printf(lcd_escreve,"%c",tecla);
+          memoryUserPosition[indexArrayDigitUser] = tecla;
+          indexArrayDigitUser++;
+        }
+        break;
+      }
+    }
+  }
+  //deleteUserEeprom();
+} 
+
+
+
+void handleEditUser(){
+  inicio:
+  printf(lcd_escreve,"\fID para editar:\r");
+  indexArrayDigitUser = 0;
+  int exit = 0;
+  while(!exit) {
+    tecla = saveCharPressByUser();
+    switch (tecla) {
+      case 'A': {
+          if(memoryUserPosition[indexArrayDigitUser] <=0) {
+            printf(lcd_escreve,"\fCampo vazio");
+            delay_ms(1000);
+            goto inicio;
+          }else {
+            if(checkExistIDOnEeprom() == 1) {
+                telaEdicao();
+            }else {
+                printf(lcd_escreve,"\fID nao existe");
+                delay_ms(1000);
+                goto inicio;
+            }
+          }
+         break;
+      }
+      case 'C':  {
+        indexArrayDigitUser = 0 ;
+        deleteIDonRAM();
+        break;
+      }
+      case '*': {
+         exit=1;
+         screen=1; // 1 = menu 
+      }
+      default: {
+        if(indexArrayDigitUser<=2) {
+          printf(lcd_escreve,"%c",tecla);
+          memoryUserPosition[indexArrayDigitUser] = tecla;
+          indexArrayDigitUser++;
+        }
+        break;
+      }
+    }
+  }
+  //deleteUserEeprom();
+} 
+
+
+void telaEdicao () {
+  printf(lcd_escreve,"\fAlterar Status:\r");
+  int exit = 0;
+  char status;
+  while(!exit) {
+    tecla = saveCharPressByUser();
+    switch (tecla) {
+      case '1': {
+         status = '1';
+         break;
+      }
+      case '0': {
+         status = '0';
+         break;
+      }
+      case 'A': {
+         exit = 1;
+         break;
+      }
+      default: {
+        break;
+      }
+    }
+    printf(lcd_escreve,"%c",tecla);
+  }
+  
+   write_ext_eeprom(savePositionForValidID+7,status);
+   printf(lcd_escreve,"\f Editado",);
+   delay_ms(1500);
+ }
+int getIdADMOnEeprom(){
+   int isEqual=1;
+   int j;
+  
+   for(j=0;j<=2;j++) {
+     if(memoryUserPosition[j]!=  read_ext_eeprom(j)) {
+         isEqual = 0;
+     }
+   }
+   
+   return isEqual;
+}
+
+int getPinADMOnEeprom(){
+   int isEqual=1;
+   int j;
+   for(j=3;j<=6;j++) {
+      if(memoryUserPosition[j] !=  read_ext_eeprom(j)) {
+        isEqual = 0;
+      }
+   }
+   
+   return isEqual;
+}
+
+void saveSignInEeprom() {
+  printf(lcd_escreve,"\fBaixando BD");
+  int freeSpace = searchFreePositionEeprom() ;
+  int j;
+  int indexMemoryRAM = 0;
+
+  if(data_avail) {
+    for( j= freeSpace ; j<=freeSpace+7 ; j++) {
+        write_ext_eeprom(j,rx_buffer[indexMemoryRAM]);
+        indexMemoryRAM++;
+    }
+    data_avail=FALSE;
+    printf(lcd_escreve,"\fSalvo! \r");
+    printf(lcd_escreve,"\fDigite ID:\r");
+    return;
+  }else {
+    for( j = freeSpace; j<= freeSpace + 7; j++){
+        write_ext_eeprom( j, memoryUserPosition[indexMemoryRAM]); 
+        indexMemoryRAM++;
+    }
+    printf(lcd_escreve,"\fCadastro\nefetuado"); 
+    delay_ms(100);
+  }
+}
+
+
+unsigned int16 searchFreePositionEeprom() {
+  int read = 0;
+  int i = 0;
+  read = read_ext_eeprom(i);
+  
+  while(read != 0xFF && read != 'x') {
+    i+= 8;
+    read = read_ext_eeprom(i);
+  }
+  return i;
+
+}
+
+void deleteUserEeprom() {
+    printf(lcd_escreve,"\fDeletando usuario");
+    delay_ms(100);
+    int isValid = checkByPc();
+    int k;
+        if(isValid) {
+            for(k=savePositionForValidID;k<= savePositionForValidID+7;k++){
+                write_ext_eeprom(k,0xFF);
+            }
+            printf(lcd_escreve,"\f Deletado!");
+            delay_ms(500);
+            del = FALSE;
+            printf(lcd_escreve,"\fDigite PIN:\r");
+            return;
+        }else {
+            printf(lcd_escreve,"\fUsuario nao\rexiste");
+            delay_ms(500);
+            del = FALSE;
+            printf(lcd_escreve,"\fDigite PIN:\r");
+            return;
+        }
+
+}
+
+void deleteUserOnEeprom() {
+     int k;
+     for(k=savePositionForValidID;k<= savePositionForValidID+7;k++){
+            write_ext_eeprom(k,0xFF);
+        }
+        printf(lcd_escreve,"\f Deletado!");
+        delay_ms(1000);
+}
+
+void editUserEeprom() {
+   int isValid = checkByPc();
+   
+   if(isValid) {
+       printf(lcd_escreve,"\fEditando Usuario");
+       delay_ms(500);
+       write_ext_eeprom(savePositionForValidID+7,rx_buffer[3]);
+       printf(lcd_escreve,"\fFinalizado!");
+       delay_ms(500);
+       edit = FALSE;
+       printf(lcd_escreve,"\fDigite ID: \r");
+      
+       return;
+   }else {
+      printf(lcd_escreve,"\fID nao existe.");
+      delay_ms(1000);
+      edit = FALSE;
+      printf(lcd_escreve,"\fDigite ID: \r");
+
+      return;
+   }
+
+}
+
+int checkDoubleIDEeprom() {
+    int hasIDEqual = 1;
+    int exit = 0;
+    int indexEeprom=1; 
+    while(!exit){
+      for(i=0;i<=2;i++){
+           if(read_ext_eeprom(i+indexEeprom*8 ) != memoryUserPosition[i]) {
+              hasIDEqual = 0;
+           }
+      }
+      if(hasIDEqual) {
+         exit=1 ;
+         savePositionForValidID = indexEeprom *8;
+      }else {
+         hasIDEqual=1;
+         indexEeprom++;
+      }
+       
+      if( indexEeprom == 65) {
+       exit =1;
+       hasIDEqual = 0 ;
+      }
+   }
+   return hasIDEqual;
+
+}
+
+int checkExistIDOnEeprom()  {
+   int isEqual = 1;
+   int indexEeprom = 1;
+   int exit =0;
+   while(!exit){
+      for(i=0;i<=2;i++){
+           if(read_ext_eeprom(i+indexEeprom*8 ) != memoryUserPosition[i]) {
+              isEqual = 0;
+           }
+      }
+      if(isEqual) {
+         exit=1 ;
+         savePositionForValidID = indexEeprom *8;
+      }else {
+         isEqual=1;
+         indexEeprom++;
+      }
+       
+      if( indexEeprom == 65) {
+       exit =1;
+       isEqual = 0 ;
+      }
+   }
+   
+   return isEqual ;
+}
+
+int checkByPc(){
+   int isEqual = 1;
+   int indexEeprom = 1;
+   int exit =0;
+   int g;
+   while(!exit){
+      for(i=0;i<=2;i++){
+           if(read_ext_eeprom(i+(indexEeprom*8) ) != rx_buffer[i]) {
+              isEqual = 0;
+           }
+      }
+      if(isEqual) {
+         exit=1 ;
+         savePositionForValidID = indexEeprom *8;
+      }else {
+         isEqual=1;
+         indexEeprom++;
+      }
+       
+      if( indexEeprom == 65) {
+       exit =1;
+       isEqual = 0 ;
+      }
+   }
+   
+   return isEqual ;
+}
+
+
+ 
+
+

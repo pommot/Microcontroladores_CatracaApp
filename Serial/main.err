@@ -1,0 +1,18 @@
+>>> Warning 203 "main.c" Line 44(1,1): Condition always TRUE
+>>> Warning 202 "C:\Users\João\Desktop\Catraca\config.c" Line 34(17,27): Variable never used:   lock_state
+>>> Warning 202 "C:\Users\João\Desktop\Catraca\config.c" Line 34(26,30): Variable never used:   lido
+>>> Warning 202 "C:\Users\João\Desktop\Catraca\config.c" Line 88(5,16): Variable never used:   deleteByPIC
+>>> Warning 202 "C:\Users\João\Desktop\Catraca\config.c" Line 94(6,14): Variable never used:   received
+>>> Warning 202 "C:\Users\João\Desktop\Catraca\config.c" Line 95(6,20): Variable never used:   interrupt_flag
+>>> Warning 202 "C:\Users\João\Desktop\Catraca\config.c" Line 103(9,11): Variable never used:   C1
+>>> Warning 202 "C:\Users\João\Desktop\Catraca\funcoesEeprom.c" Line 324(8,9): Variable never used:   g
+>>> Warning 202 "C:\Users\João\Desktop\Catraca\ultilidades.c" Line 115(8,9): Variable never used:   g
+>>> Warning 202 "main.c" Line 8(8,13): Variable never used:   value
+>>> Warning 202 "main.c" Line 8(14,28): Variable never used:   value_recebido
+>>> Warning 202 "main.c" Line 8(30,33): Variable never used:   cmd
+>>> Warning 202 "main.c" Line 9(18,25): Variable never used:   address
+>>> Warning 202 "main.c" Line 11(16,17): Variable never used:   i
+>>> Warning 202 "main.c" Line 11(20,26): Variable never used:   tensao
+>>> Warning 202 "main.c" Line 11(41,42): Variable never used:   y
+      Memory usage:   ROM=45%      RAM=19% - 26%
+      0 Errors,  16 Warnings.

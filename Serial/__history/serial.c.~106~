@@ -1,0 +1,106 @@
+#include <16F877A.h>
+#device adc=8
+#FUSES HS                       //High speed Osc (> 4mhz for PCM/PCH) (>10mhz for PCD)
+#FUSES NOPUT                    //No Power Up Timer
+#FUSES NOPROTECT                //Code not protected from reading
+#FUSES NODEBUG                  //No Debug mode for ICD
+#FUSES NOBROWNOUT               //No brownout reset
+#FUSES NOLVP                    //No low voltage prgming, B3(PIC16) or B5(PIC18) used for I/O
+#FUSES NOCPD                    //No EE protection
+#FUSES NOWRT                    //Program memory not write protected
+
+#use delay(clock=20000000)
+#use rs232(baud=9600,parity=N,xmit=PIN_C6,rcv=PIN_C7,bits=8,stream=Wireless)
+
+//===================== Bibliotecas============================= 
+
+#ifndef lcd_enable
+#define lcd_enable     pin_E1      // pino enable do LCD
+#define lcd_rs         pin_E2      // pino rs do LCD
+//#define lcd_rw      pin_e2      // pino rw do LCD
+#define lcd_d4         pin_d4      // pino de dados d4 do LCD
+#define lcd_d5         pin_d5      // pino de dados d5 do LCD
+#define lcd_d6         pin_d6      // pino de dados d6 do LCD
+#define lcd_d7         pin_d7      // pino de dados d7 do LCD
+#endif
+
+#include "mod_lcd.c"
+#include "kbd_ext_board2.c"
+#include "2401.c"
+
+#define RX_BUFFER_SIZE 16
+int8 rx_wr_index = 0; 
+int8 lock_state = 0, rxd,lido, valid_data_count; 
+unsigned int16 rx_buffer[RX_BUFFER_SIZE];
+int1 data_avail = FALSE, got_id = FALSE;
+int positionEeprom = 0;
+
+//==============================================================
+
+ 
+
+
+#int_RDA 
+void RDA_isr(void){ 
+    rx_buffer[rx_wr_index] = getc();
+    rxd = rx_buffer[rx_wr_index];
+    rx_wr_index++;
+    if (rx_wr_index > RX_BUFFER_SIZE) { rx_wr_index = 0; }
+    // now look for unique ID: "IFMT " 
+    if (rxd == 'C'){     
+        got_id = TRUE; 
+        valid_data_count = 0xff; 
+        rx_wr_index = 0;
+    }
+    if (got_id){
+        data_avail = TRUE;
+        got_id = FALSE;
+    }
+    if(rxd =='E') {
+        positionEeprom=0;
+    }
+}
+
+
+void main () {
+
+  
+  setup_adc(ADC_CLOCK_DIV_16); 
+  setup_adc_ports(AN0);
+  setup_psp(PSP_DISABLED); 
+  setup_spi(SPI_SS_DISABLED); 
+  setup_timer_0(RTCC_INTERNAL|RTCC_DIV_1);
+  setup_timer_1(T1_DISABLED); 
+  setup_timer_2(T2_DISABLED,0,1); 
+  setup_comparator(NC_NC_NC_NC);
+  setup_vref(FALSE);
+  enable_interrupts(INT_RDA); 
+  enable_interrupts(GLOBAL);
+  set_adc_channel(0);
+  output_low(PIN_D2);
+  output_low(PIN_D3);  
+  
+  init_ext_eeprom();
+  lcd_ini();
+  
+  printf(lcd_escreve,"\fIniciando...");
+  delay_ms(2000);
+  int j;
+  for(j=0;j<=255;j++){
+      write_ext_eeprom(j,0xFF);
+  }
+  while(1){
+    inicio:
+   if(data_avail){
+       for(j=0;j<=15;j++){
+           if(rx_buffer[j] == 'E') {
+               data_avail = FALSE;
+               goto inicio;
+           }
+            write_ext_eeprom(positionEeprom,rx_buffer[j]);
+            positionEeprom++;
+       }
+      printf(lcd_escreve,"\f%c",rx_buffer[0]);
+   }
+  }
+  }

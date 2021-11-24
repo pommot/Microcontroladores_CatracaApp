@@ -1,0 +1,146 @@
+
+ROM used: 3682 (45%)
+          3691 (45%) including unused fragments
+
+          2 Average locations per line
+          5 Average locations per statement
+
+RAM used: 69 (19%) at main() level
+          94 (26%) worst case
+
+Stack used: 8 worst case (out of 8 total available)
+
+Lines Stmts  %   Files
+----- ----- ---  -----
+  219   155  20  main.c
+  168    42   5  config.c
+  326     0   0  ..\..\..\..\Program Files (x86)\PICC\devices\16F877A.h
+  165    72   9  mod_lcd.c
+   56   123  16  kbd_ext_board2.c
+   87    23   3  2401.c
+  347   239  31  funcoesEeprom.c
+  185   128  16  ultilidades.c
+----- -----
+ 1553   782 Total
+
+Page ROM  %  RAM   Vol Diff  Functions:
+---- --- --- ---   --- ----  ----------
+0     20   1   1             @delay_ms1
+0      8   0   0             @const68
+0     45   1   1   260  1.9  lcd_envia_nibble
+0     33   1   3   176  2.7  lcd_envia_byte
+0     61   2   2   433  4.3  lcd_ini
+ Inline        4   186  5.5  lcd_pos_xy
+0     56   2   1   290  4.1  lcd_escreve
+ Inline        4  3601  6.4  tc_tecla
+ Inline        3             @I2C_READ_1
+0     92   2   1             @I2C_WRITE_1
+0     13   0   0    32  1.0  init_ext_eeprom
+0     74   2   1    84  2.4  ext_eeprom_ready
+0     76   2   2   134  2.8  write_ext_eeprom
+0    200   5   2   209  3.1  read_ext_eeprom
+0     27   1   0             @const150
+0     90   2   2  1099  5.8  RDA_isr
+ Inline        1   332  5.3  saveDataBaseOnEeprom
+0      7   0   0             @const173
+0     70   2   3             @PSTRINGC7_83
+ Inline        2   897  9.0  handleDeleteUserOnEeprom
+0     10   0   0             @const179
+0      7   0   0             @const181
+0      8   0   0             @const182
+ Inline        2   867  9.0  handleEditUser
+0      9   0   0             @const185
+0      7   0   0             @const187
+0      8   0   0             @const188
+ Inline        1   519  6.0  telaEdicao
+0      9   0   0             @const190
+0      5   0   0             @const194
+ Inline        3   194  5.2  getIdADMOnEeprom
+ Inline        3   194  5.2  getPinADMOnEeprom
+0    113   3   1   641  6.4  saveSignInEeprom
+0      7   0   0             @const199
+0      5   0   0             @const203
+0      7   0   0             @const204
+0     10   0   0             @const205
+ Inline        2   199  4.3  searchFreePositionEeprom
+ Inline        1   529  5.7  deleteUserEeprom
+0     10   0   0             @const208
+0      6   0   0             @const211
+0      7   0   0             @const212
+0     10   0   0             @const213
+0      7   0   0             @const214
+ Inline        2   173  3.8  deleteUserOnEeprom
+0      6   0   0             @const216
+ Inline        2   433  4.6  editUserEeprom
+0      9   0   0             @const218
+0      7   0   0             @const219
+0      7   0   0             @const220
+0      8   0   0             @const221
+0      7   0   0             @const222
+ Inline        5   540  8.5  checkDoubleIDEeprom
+1     77   2   5   540  8.5  checkExistIDOnEeprom
+0     75   2   6   566  8.7  checkByPc
+0    516  14   1   255  4.0  saveCharPressByUser
+1    194   5   2   971  9.0  handeInputsIDByUser
+0      7   0   0             @const236
+0      9   0   0             @const238
+0      7   0   0             @const239
+0      7   0   0             @const240
+1    108   3   2   624  7.9  handleSavePinOnRam
+0      4   0   0             @const243
+0     10   0   0             @const244
+0      4   0   0             @const245
+ Inline        6   560  8.7  checkId
+ Inline        5   466  7.2  checkPIN
+0     14   0   3   104  3.3  clearRAM
+0     21   1   3   139  3.7  deleteIDonRAM
+0      7   0   0             @const257
+ Inline        3   139  3.7  deletePINonRAM
+0      7   0   0             @const259
+1   1227  33   8  1117  8.1  MAIN
+0      7   0   0             @const269
+0      9   0   0             @const271
+ Inline        1   511  4.6  home
+0      8   0   0             @const273
+0     10   0   0             @const274
+0     10   0   0             @const275
+0      8   0   0             @const276
+ Inline        2  1990 10.4  menu
+0      9   0   0             @const278
+0      9   0   0             @const279
+0      8   0   0             @const281
+0      6   0   0             @const282
+0     10   0   0             @const283
+1     37   1   2             @MUL88
+ Inline        2             @PSTRINGC_83
+0     12   0   0             @const292
+0     11   0   0             @const293
+0     11   0   0             @const294
+ Inline        2   299  4.9  handleVerifySignInAdm
+0      5   0   0             @const297
+0      8   0   0             @const298
+ Inline        4   174  3.3  signIn
+
+Program metrics:
+    Functions               38
+    Statements              782
+    Comments                214
+    Volume (V)              36955
+    Difficilty (D)          203.2
+    Effort to implement (E) 7510483
+    Time to implement (T)   115 hours, 54 minutes
+    Est Delivered Bugs (B)  13
+    Cyclomatic Complexity   128
+    Maintainability (MI)    60
+
+ Segment     Used  Free
+-----------  ----  ----
+00000-00003     4  0  
+00004-00030    45  0  
+00031-007FF  1990  9  
+00800-00FFF  1643  405  
+01000-017FF     0  2048  
+01800-01FFF     0  2048  
+
+
+
