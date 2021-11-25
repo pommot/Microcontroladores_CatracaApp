@@ -1,2 +1,2 @@
 # Microcontroladores_CatracaApp
-Aplicativo para controle e acesso a usuarios utilizando Microcontrolador PIC 16F877A com interface de usuario desenvolvido em dotnet para windows e banco de dados SQl server express inttegrado. Esta simulação utiliza o PICSIMLAB para as funcionalidas da catraca eletronica.
+Aplicativo para controle e acesso de usuarios (tipo Catraca eletronica), utilizando Microcontrolador PIC 16F877A, teclado alfanumerico, display LCD 16x2 e memoria eeprom. A interface de usuario foi desenvolvido em dotnet para windows forms e banco de dados SQl server express inttegrado. Esta simulação utiliza o PICSIMLAB para as funcionalidades da catraca e um aplicativo de portas seriais COM virtuais conectada diretamente uma à outra (COM1 - COM2).
